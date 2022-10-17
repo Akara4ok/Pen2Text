@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./Pipeline/Dataloaders",
+        "./Pipeline/Preprocessing"
+    ]
+}

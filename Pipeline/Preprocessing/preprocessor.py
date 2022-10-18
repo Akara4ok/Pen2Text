@@ -91,63 +91,27 @@ class Preprocessor:
         return Batch(res_imgs, res_texts, batch.batch_size)
 
     def process_img(self, img: np.ndarray) -> np.ndarray:
-        """Resizing and apllying data augmentation."""
+        """Clusterring, resizing and apllying data augmentation."""
+        if (img is None) or (img.shape[0] <= 1 or img.shape[1] != self.img_size[1] <= 1):
+            img = np.zeros(self.img_size)
 
-        # there are damaged files in IAM dataset - just use black image instead
-        if img is None:
-            img = np.zeros(self.img_size[::-1])
+        pixel_vals = img.reshape((-1,1)) # numpy reshape operation -1 unspecified
+        pixel_vals = np.float32(pixel_vals)
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
+        k = 2
+        
+        _, labels, centers = cv2.kmeans(pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
-        # data augmentation
-        img = img.astype(np.float)
-        width, height = self.img_size
-        current_height, current_width = img.shape
-        resized_koef = min(width / current_width, height / current_height)
-        resized_koef_x = resized_koef
-        resized_koef_y = resized_koef
-        xc_bias = 0
-        yc_bias = 0
+        if(centers[0] > centers[1]):
+            labels = 1 - labels
 
-        if self.data_augmentation:
-            # photometric data augmentation
-            if random.random() < 0.25:
-                def gaussian_koef():
-                    return random.randint(1, 3) * 2 + 1
-                img = cv2.GaussianBlur(
-                    img, (gaussian_koef(), gaussian_koef()), 0)
-            if random.random() < 0.25:
-                img = cv2.dilate(img, np.ones((3, 3)))
-            if random.random() < 0.25:
-                img = cv2.erode(img, np.ones((3, 3)))
-
-            # geometric data augmentation
-            resized_koef_x = resized_koef * np.random.uniform(0.75, 1.05)
-            resized_koef_y = resized_koef * np.random.uniform(0.75, 1.05)
-
-            # random position around center
-            low_xc = (width - current_width * resized_koef_x) / 2
-            low_yc = (height - current_height * resized_koef_y) / 2
-            clipped_xc = max((width - current_width * resized_koef_x) / 2, 0)
-            clipped_yc = max((height - current_height * resized_koef_y) / 2, 0)
-            xc_bias = low_xc + np.random.uniform(-clipped_xc, clipped_xc)
-            yc_bias = low_yc + np.random.uniform(-clipped_yc, clipped_yc)
-
-        else:
-            xc_bias = (width - current_width * resized_koef) / 2
-            yc_bias = (height - current_height * resized_koef) / 2
-
-         # map image into target image
-        transform_matrix = np.float32(
-            [[resized_koef_x, 0, xc_bias], [0, resized_koef_y, yc_bias]])
-        target = np.ones(self.img_size[::-1]) * 255
-        img = cv2.warpAffine(img, transform_matrix, dsize=self.img_size,
-                                dst=target, borderMode=cv2.BORDER_TRANSPARENT)
-
-        # transpose for TF
-        # img = cv2.transpose(img)
-
-        # convert to range [-1, 1]
-        img = img / 255 - 0.5
-        return img
+        centers = np.array([[0], [255]])
+        
+        segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
+        segmented_image = segmented_data.reshape((img.shape))
+        
+        segmented_image = segmented_image / 255 - 0.5
+        return segmented_image
 
 
     def process_batch(self, batch: Batch) -> Batch:

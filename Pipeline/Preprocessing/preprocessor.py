@@ -17,12 +17,15 @@ class Preprocessor:
 
     def __init__(self,
                  img_size: Tuple[int, int],
+                 clustering_percent: float = 0.1,
                  data_augmentation: bool = False,
                  line_mode: bool = False) -> None:
 
         self.img_size = img_size
         self.data_augmentation = data_augmentation
         self.line_mode = line_mode
+        self.clustering_percent = clustering_percent
+        self.clustered_in_batch = 0
 
     @staticmethod
     def _truncate_label(text: str, max_text_len: int) -> str:
@@ -44,7 +47,6 @@ class Preprocessor:
 
     def _create_text_line(self, batch: Batch) -> Batch:
         """Create image of a text line by pasting multiple word images into an image."""
-
 
         # go over all batch elements
         res_imgs = []
@@ -90,38 +92,74 @@ class Preprocessor:
 
         return Batch(res_imgs, res_texts, batch.batch_size)
 
-    def process_img(self, img: np.ndarray) -> np.ndarray:
+    def process_img(self, img: np.ndarray, batch_len: int) -> np.ndarray:
         """Clusterring, resizing and apllying data augmentation."""
-        if (img is None) or (img.shape[0] <= 1 or img.shape[1] != self.img_size[1] <= 1):
+        if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1):
             img = np.zeros(self.img_size)
 
-        pixel_vals = img.reshape((-1,1)) # numpy reshape operation -1 unspecified
-        pixel_vals = np.float32(pixel_vals)
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
-        k = 2
-        
-        _, labels, centers = cv2.kmeans(pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+        res_image = img
+        if self.clustered_in_batch / batch_len < self.clustering_percent:
+            # numpy reshape operation -1 unspecified
+            pixel_vals = img.reshape((-1, 1))
+            pixel_vals = np.float32(pixel_vals)
+            criteria = (cv2.TERM_CRITERIA_EPS +
+                        cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
+            k = 2
 
-        if(centers[0] > centers[1]):
-            labels = 1 - labels
+            _, labels, centers = cv2.kmeans(
+                pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
-        centers = np.array([[0], [255]])
-        
-        segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
-        segmented_image = segmented_data.reshape((img.shape))
-        
-        segmented_image = segmented_image / 255 - 0.5
-        return segmented_image
+            if centers[0] > centers[1]:
+                labels = 1 - labels
 
+            centers = np.array([[0], [255]])
+
+            # Mapping labels to center points( RGB Value)
+            segmented_data = centers[labels.flatten()]
+            segmented_image = segmented_data.reshape((img.shape))
+            self.clustered_in_batch += 1
+            res_image = segmented_image
+        
+        # general preprocessing
+        scale_percent = self.img_size[0] / img.shape[0]
+        width = int(img.shape[1] * scale_percent)
+        height = int(img.shape[0] * scale_percent)
+        resized = cv2.resize(res_image.astype('float32'), (width, height), interpolation = cv2.INTER_AREA)
+
+        # add padding or crop image
+        if(not self.line_mode):
+            color = 255
+            new_height = self.img_size[0]
+            new_width = self.img_size[1]
+            old_height = resized.shape[0]
+            old_width = resized.shape[1]
+            pad_img = np.full((self.img_size[0],self.img_size[1]), color, dtype=np.uint8)
+
+            # compute center offset
+            y_center = (new_height - old_height) // 2
+            x_center = max((new_width - old_width) // 2, 0)
+
+            # copy img image into center of result image
+            print(pad_img[y_center:y_center+old_height,
+                x_center:x_center+old_width].shape)
+            pad_img[y_center:y_center+old_height,
+                x_center:x_center+old_width] = resized[:, :old_width]
+
+
+
+        res_image = pad_img / 255
+        return res_image
 
     def process_batch(self, batch: Batch) -> Batch:
-        "Preprocess batch"
+        """ Process batch of input"""
+        self.clustered_in_batch = 0
         if self.line_mode:
             batch = self._create_text_line(batch)
 
-        res_imgs = [self.process_img(img) for img in batch.imgs]
+        res_imgs = [self.process_img(img, len(batch.imgs))
+                    for img in batch.imgs]
         # res_imgs = batch[0]
         max_text_len = res_imgs[0].shape[0] // 4
-        res_texts = [self._truncate_label(text, max_text_len) for text in batch.texts]
+        res_texts = [self._truncate_label(
+            text, max_text_len) for text in batch.texts]
         return Batch(res_imgs, res_texts, batch.batch_size)
-        

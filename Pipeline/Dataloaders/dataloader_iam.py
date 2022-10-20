@@ -73,14 +73,26 @@ class DataLoaderIAM(DataLoader):
         # val set: allow last batch to be smaller
         return self.curr_idx < len(self.samples)
 
+    def has_train_batch(self) -> bool:
+        """Is there a next element for training?"""
+        return self.curr_idx < len(self.samples)
+
+    def has_val_batch(self) -> bool:
+        """Is there a next element for validation?"""
+        return self.curr_idx < len(self.samples)
+
+    def has_test_batch(self) -> bool:
+        """Is there a next element for testing?"""
+        return self.curr_idx < len(self.samples)
+
     def _get_img(self, i: int, mode: str = '') -> np.ndarray:
-        if(mode == ''):
+        if mode == '':
             img = cv2.imread(self.samples[i].file_path, cv2.IMREAD_GRAYSCALE)
-        if(mode == 'train'):
+        if mode == 'train':
             img = cv2.imread(self.train_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
-        if(mode == 'val'):
+        if mode == 'val':
             img = cv2.imread(self.val_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
-        if(mode == 'test'):
+        if mode == 'test':
             img = cv2.imread(self.testing_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
 
         return img

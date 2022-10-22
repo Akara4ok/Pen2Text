@@ -1,15 +1,16 @@
 """ Preprocessing for images """
 
+from dataloader_iam import Batch
 import random
 from typing import Tuple
 
 import sys
 import cv2
 import numpy as np
-import data_generator_settings as generator_settings
 
-sys.path.append('Pipeline/Dataloaders/')
-from dataloader_iam import Batch
+
+sys.path.append('Pipeline/')
+import model_settings as settings
 
 
 class Preprocessor:
@@ -27,24 +28,6 @@ class Preprocessor:
         self.clustering_percent = clustering_percent
         self.clustered_in_batch = 0
 
-    @staticmethod
-    def _truncate_label(text: str, max_text_len: int) -> str:
-        """
-        Function ctc_loss can't compute loss
-        if it cannot find a mapping between text label and input
-        labels. Repeat letters cost double because of the blank symbol needing to be inserted.
-        If a too-long label is provided, ctc_loss returns an infinite gradient.
-        """
-        cost = 0
-        for (i, curr_text) in enumerate(text):
-            if i != 0 and curr_text == text[i - 1]:
-                cost += 2
-            else:
-                cost += 1
-            if cost > max_text_len:
-                return text[:i]
-        return text
-
     def _create_text_line(self, batch: Batch) -> Batch:
         """Create image of a text line by pasting multiple word images into an image."""
 
@@ -54,7 +37,7 @@ class Preprocessor:
         for i in range(batch.batch_size):
             # number of words to put into current line
             num_words = random.randint(
-                1, 8) if self.data_augmentation else generator_settings.DEFAULT_WORD_NUM
+                1, 8) if self.data_augmentation else settings.DEFAULT_WORD_NUM
 
             # concat ground truth texts
             curr_res_text = ' '.join(
@@ -69,7 +52,7 @@ class Preprocessor:
             for j in range(num_words):
                 curr_sel_img = batch.imgs[(i + j) % batch.batch_size]
                 curr_word_sep = random.randint(
-                    20, 50) if self.data_augmentation else generator_settings.DEFAULT_WORD_SEP
+                    20, 50) if self.data_augmentation else settings.DEFAULT_WORD_SEP
                 height = max(height, curr_sel_img.shape[0])
                 width += curr_sel_img.shape[1]
                 sel_imgs.append(curr_sel_img)
@@ -94,7 +77,7 @@ class Preprocessor:
 
     def process_img(self, img: np.ndarray, batch_len: int) -> np.ndarray:
         """Clusterring, resizing and apllying data augmentation."""
-        if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1):
+        if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1) or (img.shape[0] / img.shape[1] < 0.05):
             img = np.zeros(self.img_size)
 
         res_image = img
@@ -119,35 +102,72 @@ class Preprocessor:
             segmented_image = segmented_data.reshape((img.shape))
             self.clustered_in_batch += 1
             res_image = segmented_image
-        
-        # general preprocessing
-        scale_percent = self.img_size[0] / img.shape[0]
-        width = int(img.shape[1] * scale_percent)
-        height = int(img.shape[0] * scale_percent)
-        resized = cv2.resize(res_image.astype('float32'), (width, height), interpolation = cv2.INTER_AREA)
 
-        # add padding or crop image
-        if(not self.line_mode):
-            color = 255
-            new_height = self.img_size[0]
-            new_width = self.img_size[1]
-            old_height = resized.shape[0]
-            old_width = resized.shape[1]
-            pad_img = np.full((self.img_size[0],self.img_size[1]), color, dtype=np.uint8)
+        if self.data_augmentation:
+            height, width = self.img_size
+            current_height, current_width = res_image.shape
+            # photometric data augmentation
+            # TODO delete this part if accuracy will be low
+            if random.random() < 0.25:
+                def gaussian_koef():
+                    return random.randint(1, 3) * 2 + 1
+                img = cv2.GaussianBlur(
+                    img, (gaussian_koef(), gaussian_koef()), 0)
+            if random.random() < 0.25:
+                img = cv2.dilate(img, np.ones((3, 3)))
 
-            # compute center offset
-            y_center = (new_height - old_height) // 2
-            x_center = max((new_width - old_width) // 2, 0)
+            # geometric data augmentation
+            resized_koef = min(width / current_width, height / current_height)
+            resized_koef_x = resized_koef * np.random.uniform(0.75, 1.05)
+            resized_koef_y = resized_koef * np.random.uniform(0.75, 1.05)
 
-            # copy img image into center of result image
-            print(pad_img[y_center:y_center+old_height,
-                x_center:x_center+old_width].shape)
-            pad_img[y_center:y_center+old_height,
-                x_center:x_center+old_width] = resized[:, :old_width]
+            # random position around center
+            low_xc = (width - current_width * resized_koef_x) / 2
+            low_yc = (height - current_height * resized_koef_y) / 2
+            clipped_xc = max((width - current_width * resized_koef_x) / 2, 0)
+            clipped_yc = max((height - current_height * resized_koef_y) / 2, 0)
+            xc_bias = low_xc + np.random.uniform(-clipped_xc, clipped_xc)
+            yc_bias = low_yc + np.random.uniform(-clipped_yc, clipped_yc)
+            transform_matrix = np.float32(
+                [[resized_koef_x, 0, xc_bias], [0, resized_koef_y, yc_bias]])
+            target = np.full(
+                (self.img_size[0], self.img_size[1]), 255, dtype=np.uint8)
 
+            res_image = cv2.warpAffine(res_image.astype(np.uint8), transform_matrix, 
+                                        dsize=(self.img_size[1], self.img_size[0]),
+                                        flags=cv2.INTER_AREA, dst=target, 
+                                        borderMode=cv2.BORDER_TRANSPARENT)
 
+        else:
+            # general preprocessing
+            old_width = img.shape[1]
+            old_height = img.shape[0]
+            scale_percent = min(
+                self.img_size[1] / old_width, self.img_size[0] / old_height)
 
-        res_image = pad_img / 255
+            width = int(img.shape[1] * scale_percent)
+            height = int(img.shape[0] * scale_percent)
+            resized = cv2.resize(res_image.astype('float32'),
+                                (width, height), interpolation=cv2.INTER_AREA)
+            # add padding or crop image
+            if not self.line_mode:
+                color = 255
+                new_height = self.img_size[0]
+                new_width = self.img_size[1]
+                old_height = resized.shape[0]
+                old_width = resized.shape[1]
+                pad_img = np.full(
+                    (self.img_size[0], self.img_size[1]), color, dtype=np.uint8)
+
+                # compute center offset
+                y_center = max((new_height - old_height) // 2, 0)
+                x_center = max((new_width - old_width) // 2, 0)
+                
+                pad_img[y_center:y_center+old_height,
+                        x_center:x_center+old_width] = resized
+                res_image = pad_img
+
+        #res_image = res_image / 255
         return res_image
 
     def process_batch(self, batch: Batch) -> Batch:
@@ -158,8 +178,6 @@ class Preprocessor:
 
         res_imgs = [self.process_img(img, len(batch.imgs))
                     for img in batch.imgs]
-        # res_imgs = batch[0]
-        max_text_len = res_imgs[0].shape[0] // 4
-        res_texts = [self._truncate_label(
-            text, max_text_len) for text in batch.texts]
+
+        res_texts = [text for text in batch.texts]
         return Batch(res_imgs, res_texts, batch.batch_size)

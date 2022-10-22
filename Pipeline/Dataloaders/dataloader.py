@@ -4,11 +4,14 @@ import abc
 from collections import namedtuple
 import errno
 import os
+import sys
 
 from typing import Tuple
 from path import Path
 import numpy as np
-import dataloaders_settings as data_settings
+
+sys.path.append('Pipeline/')
+import model_settings as settings
 
 
 Sample = namedtuple('Sample', 'text, file_path')
@@ -29,7 +32,7 @@ class DataLoader(metaclass=abc.ABCMeta):
 
         self.samples = []
         self.char_list = [ch for ch in open(
-            data_settings.CHAR_DIR, encoding='UTF-8').read() if ch != '\n' if ch != ' ']
+            settings.CHAR_DIR, encoding='UTF-8').read() if ch != '\n' if ch != ' ']
 
     @abc.abstractmethod
     def get_iterator_info(self) -> Tuple[int, int]:

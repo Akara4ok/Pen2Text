@@ -10,7 +10,6 @@ from path import Path
 from dataloader import DataLoader
 from dataloader import Sample
 from dataloader import Batch
-import dataloaders_settings as data_settings
 
 sys.path.append('Pipeline/')
 import model_settings as settings
@@ -47,14 +46,14 @@ class DataLoaderIAM(DataLoader):
                 text = ' '.join(line_split[8:])
                 self.samples.append(Sample(text, file_name))
 
-            train_idx = int(data_settings.TRAIN_PERCENT * len(self.samples))
+            train_idx = int(settings.TRAIN_PERCENT * len(self.samples))
             val_idx = train_idx + \
-                int(data_settings.VAL_PERCENT * len(self.samples))
+                int(settings.VAL_PERCENT * len(self.samples))
 
             self.train_samples = self.samples[:train_idx]
             random.shuffle(self.train_samples)
             self.val_samples = self.samples[train_idx:val_idx]
-            self.testing_samples = self.samples[val_idx:]
+            self.test_samples = self.samples[val_idx:]
 
             self.train_curr_idx = 0
             self.val_curr_idx = 0
@@ -62,7 +61,7 @@ class DataLoaderIAM(DataLoader):
 
             self.train_words = [x.text for x in self.train_samples]
             self.val_words = [x.text for x in self.val_samples]
-            self.testing_words = [x.text for x in self.testing_samples]
+            self.testing_words = [x.text for x in self.test_samples]
 
     def get_iterator_info(self) -> Tuple[int, int]:
         num_batches = int(np.ceil(len(self.samples) / self.batch_size))
@@ -75,15 +74,15 @@ class DataLoaderIAM(DataLoader):
 
     def has_train_batch(self) -> bool:
         """Is there a next element for training?"""
-        return self.curr_idx < len(self.samples)
+        return self.train_curr_idx < len(self.train_samples)
 
     def has_val_batch(self) -> bool:
         """Is there a next element for validation?"""
-        return self.curr_idx < len(self.samples)
+        return self.val_curr_idx < len(self.val_samples)
 
     def has_test_batch(self) -> bool:
         """Is there a next element for testing?"""
-        return self.curr_idx < len(self.samples)
+        return self.test_curr_idx < len(self.test_samples)
 
     def _get_img(self, i: int, mode: str = '') -> np.ndarray:
         if mode == '':
@@ -93,7 +92,7 @@ class DataLoaderIAM(DataLoader):
         if mode == 'val':
             img = cv2.imread(self.val_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
         if mode == 'test':
-            img = cv2.imread(self.testing_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
+            img = cv2.imread(self.test_samples[i].file_path, cv2.IMREAD_GRAYSCALE)
 
         return img
 
@@ -110,7 +109,7 @@ class DataLoaderIAM(DataLoader):
     def get_train_batch(self) -> Batch:
         """ Returns train batch """
         batch_range = range(self.train_curr_idx, min(
-            self.train_curr_idx + self.batch_size, len(self.samples)))
+            self.train_curr_idx + self.batch_size, len(self.train_samples)))
 
         imgs = [self._get_img(i, 'train') for i in batch_range]
         texts = [self.train_samples[i].text for i in batch_range]
@@ -120,8 +119,8 @@ class DataLoaderIAM(DataLoader):
 
     def get_val_batch(self) -> Batch:
         """ Returns train batch """
-        batch_range = range(self.curr_idx, min(
-            self.val_curr_idx + self.batch_size, len(self.samples)))
+        batch_range = range(self.val_curr_idx, min(
+            self.val_curr_idx + self.batch_size, len(self.val_samples)))
 
         imgs = [self._get_img(i, 'val') for i in batch_range]
         texts = [self.val_samples[i].text for i in batch_range]
@@ -131,11 +130,11 @@ class DataLoaderIAM(DataLoader):
 
     def get_test_batch(self) -> Batch:
         """ Returns train batch """
-        batch_range = range(self.curr_idx, min(
-            self.test_curr_idx + self.batch_size, len(self.samples)))
+        batch_range = range(self.test_curr_idx, min(
+            self.test_curr_idx + self.batch_size, len(self.test_samples)))
 
         imgs = [self._get_img(i, 'test') for i in batch_range]
-        texts = [self.testing_samples[i].text for i in batch_range]
+        texts = [self.test_samples[i].text for i in batch_range]
 
         self.test_curr_idx += self.batch_size
         return Batch(imgs, texts, len(imgs))

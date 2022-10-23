@@ -1,5 +1,8 @@
 """ Constants for dataloaders, preprocessing and model """
 
+#general
+BATCH_SIZE = 10
+
 #data loader constants
 TRAIN_PERCENT = 0.7
 VAL_PERCENT = 0.1
@@ -11,6 +14,7 @@ WIDTH = 256
 HEIGHT = 32
 DEFAULT_WORD_SEP = 30
 DEFAULT_WORD_NUM = 5
+CLUSTERING_PERCENT = 0.1
 
 #training constants
-TRAINING_MODE = 'words'
+LINE_MODE = False

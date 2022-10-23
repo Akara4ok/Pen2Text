@@ -1,6 +1,5 @@
 """ Preprocessing for images """
 
-from dataloader_iam import Batch
 import random
 from typing import Tuple
 
@@ -11,6 +10,8 @@ import numpy as np
 
 sys.path.append('Pipeline/')
 import model_settings as settings
+sys.path.append('Pipeline/utils')
+from utils_types import Batch
 
 
 class Preprocessor:
@@ -176,8 +177,8 @@ class Preprocessor:
         if self.line_mode:
             batch = self._create_text_line(batch)
 
-        res_imgs = [self.process_img(img, len(batch.imgs))
-                    for img in batch.imgs]
+        res_imgs = np.array([self.process_img(img, len(batch.imgs))
+                    for img in batch.imgs])
 
-        res_texts = [text for text in batch.texts]
-        return Batch(res_imgs, res_texts, batch.batch_size)
+        res_texts = np.array([text for text in batch.texts])
+        return Batch(res_imgs, res_texts)

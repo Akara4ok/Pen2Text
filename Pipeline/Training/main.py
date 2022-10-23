@@ -4,25 +4,20 @@ import cv2
 import time
 from path import Path
 
-sys.path.append('Pipeline/Dataloaders/')
-from dataloader_iam import DataLoaderIAM
-sys.path.append('Pipeline/Preprocessing/')
-from preprocessor import Preprocessor
+sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
+from iam_dataloader import DataLoaderIAM
+sys.path.append('Pipeline/Dataset/IAM Dataset/')
+from iam_sequence import IAMSequence
 sys.path.append('Pipeline/')
 import model_settings as settings
 
-data_loader = DataLoaderIAM(Path("Data/IAM Dataset"), 100)
 
-preprocessor = Preprocessor((settings.WIDTH, settings.HEIGHT), False, False)
+data_loader = DataLoaderIAM(Path("Data/IAM Dataset"), 10, settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT)
 
-start = time.time()
-i = 0
-while data_loader.has_test_batch():
-    old_images = data_loader.get_test_batch()
+train, val, test = data_loader.split()
+dataset = IAMSequence(train[0], train[1], settings.BATCH_SIZE, 'test')
 
-    new_images = preprocessor.process_batch(old_images)
-    print("batch -",  i)
-    i += 1
-
-end = time.time()
-print(end - start)
+for (x, y) in dataset:
+    for img in x:
+        cv2.imshow("img", img)
+        cv2.waitKey(0)

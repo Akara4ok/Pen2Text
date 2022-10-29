@@ -7,7 +7,7 @@ BATCH_SIZE = 10
 TRAIN_PERCENT = 0.7
 VAL_PERCENT = 0.1
 TEST_PERCENT = 0.2
-CHAR_DIR = 'Pipeline/Dataloaders/CharLists.txt'
+CHAR_DIR = 'Pipeline/CharList.txt'
 
 #preprocessing constants
 WIDTH = 256

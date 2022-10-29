@@ -16,11 +16,10 @@ Gets RNN matrix, decodes it and returns text
 
 import tensorflow as tf
 
-
 class Pen2Text(tf.keras.Model):
     """ Model architecture class """
 
-    def __init__(self, char_list):
+    def __init__(self, char_list: list):
         super().__init__()
         self.char_list = char_list
         # CNN layers
@@ -69,14 +68,14 @@ class Pen2Text(tf.keras.Model):
         #output
         self.outputs = tf.keras.layers.Dense(len(char_list)+1, activation = 'softmax')
 
-    def call(self, inputs):
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
         """ Model prediction """
-        x = inputs
+        current_layer = inputs
         for i in range(self.num_cnn_layers):
-            x = self.cnn_layers[i](x)
-            x = self.pool_layers[i](x)
-        x = self.squeezed(x)
-        x = self.bidirectional_rnn_1(x)
-        x = self.bidirectional_rnn_2(x)
-        x = self.outputs(x)
-        return x
+            current_layer = self.cnn_layers[i](current_layer)
+            current_layer = self.pool_layers[i](current_layer)
+        current_layer = self.squeezed(current_layer)
+        current_layer = self.bidirectional_rnn_1(current_layer)
+        current_layer = self.bidirectional_rnn_2(current_layer)
+        current_layer = self.outputs(current_layer)
+        return current_layer

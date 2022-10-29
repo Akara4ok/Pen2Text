@@ -179,6 +179,6 @@ class Preprocessor:
 
         res_imgs = np.array([self.process_img(img, len(batch.imgs))
                     for img in batch.imgs])
-
+isTraining = False
         res_texts = np.array([text for text in batch.texts])
         return Batch(res_imgs, res_texts)

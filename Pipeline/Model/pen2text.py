@@ -28,6 +28,9 @@ class Pen2Text(tf.keras.Model):
         stride_vals = pool_vals = [(2, 2), (2, 2), (2, 2), (2, 1), (2, 1)]
         self.num_cnn_layers = len(feature_vals)
 
+        self.cast_input = tf.keras.layers.Lambda(lambda x: tf.cast(x, tf.float32))
+        self.expand_lambda = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis = 3))
+
         self.cnn_layers = []
         self.pool_layers = []
         for i in range(self.num_cnn_layers):
@@ -66,11 +69,14 @@ class Pen2Text(tf.keras.Model):
         )
 
         #output
-        self.outputs = tf.keras.layers.Dense(len(char_list)+1, activation = 'softmax')
+        self.outputs = tf.keras.layers.Dense(len(char_list)+2, activation = 'softmax')
 
     def call(self, inputs: tf.Tensor) -> tf.Tensor:
         """ Model prediction """
+
         current_layer = inputs
+        current_layer = self.cast_input(current_layer)
+        current_layer = self.expand_lambda(current_layer)
         for i in range(self.num_cnn_layers):
             current_layer = self.cnn_layers[i](current_layer)
             current_layer = self.pool_layers[i](current_layer)

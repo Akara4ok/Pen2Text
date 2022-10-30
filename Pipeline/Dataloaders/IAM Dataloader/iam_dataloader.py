@@ -21,7 +21,10 @@ class DataLoaderIAM(DataLoader):
 
         with open(data_dir / "ascii" / self.mode + ".txt", encoding='utf-8') as file:
             bad_samples = ['a01-117-05-02', 'r06-022-03-05']
+            i = 0
             for line in file:
+                if (i > 10000):
+                    break
                 if not line or line[0] == '#':
                     continue
 
@@ -42,6 +45,7 @@ class DataLoaderIAM(DataLoader):
 
                 text = ' '.join(line_split[8:])
                 self.samples.append(Sample(text, file_name))
+                i += 1
 
     def split(self) -> Tuple:
         train_idx = int(settings.TRAIN_PERCENT * len(self.samples))

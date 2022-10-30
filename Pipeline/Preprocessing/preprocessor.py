@@ -1,12 +1,13 @@
 """ Preprocessing for images """
 
+from email.policy import default
 import random
 from typing import Tuple
 
 import sys
 import cv2
 import numpy as np
-
+import tensorflow as tf
 
 sys.path.append('Pipeline/')
 import model_settings as settings
@@ -19,6 +20,7 @@ class Preprocessor:
 
     def __init__(self,
                  img_size: Tuple[int, int],
+                 char_to_num: tf.keras.layers,
                  clustering_percent: float = 0.1,
                  data_augmentation: bool = False,
                  line_mode: bool = False) -> None:
@@ -28,6 +30,7 @@ class Preprocessor:
         self.line_mode = line_mode
         self.clustering_percent = clustering_percent
         self.clustered_in_batch = 0
+        self.char_to_num = char_to_num
 
     def _create_text_line(self, batch: Batch) -> Batch:
         """Create image of a text line by pasting multiple word images into an image."""
@@ -171,14 +174,26 @@ class Preprocessor:
         #res_image = res_image / 255
         return res_image
 
+    def process_text(self, text, max_len):
+        """ Process text """
+        text = text[:-1]
+        # Split the label
+        text = tf.strings.unicode_split(text, input_encoding="UTF-8")
+        # Map the characters in label to numbers
+        text = self.char_to_num(text)
+        text = text.numpy()
+        text = np.pad(text, (0, max_len - len(text)), 'constant', constant_values=(0))
+        return text
+
     def process_batch(self, batch: Batch) -> Batch:
         """ Process batch of input"""
         self.clustered_in_batch = 0
         if self.line_mode:
             batch = self._create_text_line(batch)
 
-        res_imgs = np.array([self.process_img(img, len(batch.imgs))
+        res_imgs = tf.convert_to_tensor([self.process_img(img, len(batch.imgs))
                     for img in batch.imgs])
-isTraining = False
-        res_texts = np.array([text for text in batch.texts])
+
+        res_texts = tf.convert_to_tensor([self.process_text(text, 15)
+                    for text in batch.texts])
         return Batch(res_imgs, res_texts)

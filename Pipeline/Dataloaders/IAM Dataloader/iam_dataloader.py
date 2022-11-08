@@ -15,15 +15,15 @@ class DataLoaderIAM(DataLoader):
     """Class for loading and spliting IAM dataset"""
 
     def __init__(self, data_dir: Path, batch_size: int, train_percent: float,
-                    val_percent: float, test_percent: float) -> None:
-        super().__init__(data_dir, batch_size, train_percent, val_percent, test_percent)
+                    val_percent: float, test_percent: float, img_num: int) -> None:
+        super().__init__(data_dir, batch_size, train_percent, val_percent, test_percent, img_num)
         self.mode = 'lines' if settings.LINE_MODE else 'words'
 
         with open(data_dir / "ascii" / self.mode + ".txt", encoding='utf-8') as file:
             bad_samples = ['a01-117-05-02', 'r06-022-03-05']
             i = 0
             for line in file:
-                if (i > 10000):
+                if (img_num != -1 and i > img_num):
                     break
                 if not line or line[0] == '#':
                     continue

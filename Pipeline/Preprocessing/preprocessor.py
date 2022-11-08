@@ -4,6 +4,7 @@ from email.policy import default
 import random
 from typing import Tuple
 
+import os
 import sys
 import cv2
 import numpy as np
@@ -13,7 +14,7 @@ sys.path.append('Pipeline/')
 import model_settings as settings
 sys.path.append('Pipeline/utils')
 from utils_types import Batch
-
+from PIL import Image
 
 class Preprocessor:
     """ Class for preprocessing for images """
@@ -171,8 +172,45 @@ class Preprocessor:
                         x_center:x_center+old_width] = resized
                 res_image = pad_img
 
-        #res_image = res_image / 255
+        res_image = res_image / 255
         return res_image
+
+    def find_dominant_color(self, image):
+        #Resizing parameters
+        width, height = 150,150
+        image = image.resize((width, height),resample = 0)
+        #Get colors from image object
+        pixels = image.getcolors(width * height)
+        #Sort them by count number(first element of tuple)
+        sorted_pixels = sorted(pixels, key=lambda t: t[0])
+        #Get the most frequent color
+        dominant_color = sorted_pixels[-1][1]
+        return dominant_color
+
+    def process_img2(self, img: np.ndarray, imgSize) -> np.ndarray:
+        "put img into target img of size imgSize, transpose for TF and normalize gray-values"
+        # there are damaged files in IAM dataset - just use black image instead
+        if img is None:
+            img = np.zeros([imgSize[1], imgSize[0]]) 
+            print("Image None!")
+
+        # create target image and copy sample image into it
+        (wt, ht) = imgSize
+        (h, w) = img.shape
+        fx = w / wt
+        fy = h / ht
+        f = max(fx, fy)
+        newSize = (max(min(wt, int(w / f)), 1),
+                max(min(ht, int(h / f)), 1))  # scale according to f (result at least 1 and at most wt or ht)
+        img = cv2.resize(img, newSize, interpolation=cv2.INTER_CUBIC) # INTER_CUBIC interpolation best approximate the pixels image
+                                                                # see this https://stackoverflow.com/a/57503843/7338066
+        most_freq_pixel=self.find_dominant_color(Image.fromarray(img))
+        target = np.ones([ht, wt]) * most_freq_pixel  
+        target[0:newSize[1], 0:newSize[0]] = img
+
+        img = target
+
+        return img
 
     def process_text(self, text, max_len):
         """ Process text """
@@ -182,8 +220,23 @@ class Preprocessor:
         # Map the characters in label to numbers
         text = self.char_to_num(text)
         text = text.numpy()
-        text = np.pad(text, (0, max_len - len(text)), 'constant', constant_values=(0))
+        #text = np.pad(text, (0, max_len - len(text)), 'constant', constant_values=(0))
         return text
+
+    def encode_to_labels(self, txt, char_list):
+        # encoding each output word into digits
+        dig_lst = []
+        for index, char in enumerate(txt):
+            try:
+                dig_lst.append(char_list.index(char))
+            except:
+                pass
+            
+        return dig_lst
+
+    def get_img(self, path):
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        return img
 
     def process_batch(self, batch: Batch) -> Batch:
         """ Process batch of input"""
@@ -194,6 +247,6 @@ class Preprocessor:
         res_imgs = tf.convert_to_tensor([self.process_img(img, len(batch.imgs))
                     for img in batch.imgs])
 
-        res_texts = tf.convert_to_tensor([self.process_text(text, 15)
+        res_texts = tf.ragged.constant([self.process_text(text, 15)
                     for text in batch.texts])
         return Batch(res_imgs, res_texts)

@@ -1,7 +1,7 @@
 """ Constants for dataloaders, preprocessing and model """
 
 #general
-BATCH_SIZE = 10
+BATCH_SIZE = 100
 
 #data loader constants
 TRAIN_PERCENT = 0.7

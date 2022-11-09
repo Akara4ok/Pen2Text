@@ -14,15 +14,17 @@ sys.path.append('Pipeline/')
 import model_settings as settings
 sys.path.append('Pipeline/utils')
 from utils_types import Batch
-from PIL import Image
+
 
 class Preprocessor:
     """ Class for preprocessing for images """
 
     def __init__(self,
                  img_size: Tuple[int, int],
-                 char_to_num: tf.keras.layers,
-                 clustering_percent: float = 0.1,
+                 char_list: list,
+                 max_len: int,
+                 batch_size: int,
+                 clustering_percent: float = 1,
                  data_augmentation: bool = False,
                  line_mode: bool = False) -> None:
 
@@ -31,7 +33,9 @@ class Preprocessor:
         self.line_mode = line_mode
         self.clustering_percent = clustering_percent
         self.clustered_in_batch = 0
-        self.char_to_num = char_to_num
+        self.char_list = char_list
+        self.batch_size = batch_size
+        self.max_len = max_len
 
     def _create_text_line(self, batch: Batch) -> Batch:
         """Create image of a text line by pasting multiple word images into an image."""
@@ -80,13 +84,13 @@ class Preprocessor:
 
         return Batch(res_imgs, res_texts, batch.batch_size)
 
-    def process_img(self, img: np.ndarray, batch_len: int) -> np.ndarray:
+    def process_img(self, img: np.ndarray) -> np.ndarray:
         """Clusterring, resizing and apllying data augmentation."""
         if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1) or (img.shape[0] / img.shape[1] < 0.05):
             img = np.zeros(self.img_size)
 
         res_image = img
-        if self.clustered_in_batch / batch_len < self.clustering_percent:
+        if self.clustered_in_batch / self.batch_size < self.clustering_percent:
             # numpy reshape operation -1 unspecified
             pixel_vals = img.reshape((-1, 1))
             pixel_vals = np.float32(pixel_vals)
@@ -138,10 +142,11 @@ class Preprocessor:
             target = np.full(
                 (self.img_size[0], self.img_size[1]), 255, dtype=np.uint8)
 
-            res_image = cv2.warpAffine(res_image.astype(np.uint8), transform_matrix, 
-                                        dsize=(self.img_size[1], self.img_size[0]),
-                                        flags=cv2.INTER_AREA, dst=target, 
-                                        borderMode=cv2.BORDER_TRANSPARENT)
+            res_image = cv2.warpAffine(res_image.astype(np.uint8), transform_matrix,
+                                       dsize=(
+                                           self.img_size[1], self.img_size[0]),
+                                       flags=cv2.INTER_AREA, dst=target,
+                                       borderMode=cv2.BORDER_TRANSPARENT)
 
         else:
             # general preprocessing
@@ -153,7 +158,7 @@ class Preprocessor:
             width = int(img.shape[1] * scale_percent)
             height = int(img.shape[0] * scale_percent)
             resized = cv2.resize(res_image.astype('float32'),
-                                (width, height), interpolation=cv2.INTER_AREA)
+                                 (width, height), interpolation=cv2.INTER_AREA)
             # add padding or crop image
             if not self.line_mode:
                 color = 255
@@ -167,72 +172,25 @@ class Preprocessor:
                 # compute center offset
                 y_center = max((new_height - old_height) // 2, 0)
                 x_center = max((new_width - old_width) // 2, 0)
-                
+
                 pad_img[y_center:y_center+old_height,
                         x_center:x_center+old_width] = resized
                 res_image = pad_img
 
         res_image = res_image / 255
+        res_image = np.expand_dims(res_image,axis=-1)
         return res_image
 
-    def find_dominant_color(self, image):
-        #Resizing parameters
-        width, height = 150,150
-        image = image.resize((width, height),resample = 0)
-        #Get colors from image object
-        pixels = image.getcolors(width * height)
-        #Sort them by count number(first element of tuple)
-        sorted_pixels = sorted(pixels, key=lambda t: t[0])
-        #Get the most frequent color
-        dominant_color = sorted_pixels[-1][1]
-        return dominant_color
-
-    def process_img2(self, img: np.ndarray, imgSize) -> np.ndarray:
-        "put img into target img of size imgSize, transpose for TF and normalize gray-values"
-        # there are damaged files in IAM dataset - just use black image instead
-        if img is None:
-            img = np.zeros([imgSize[1], imgSize[0]]) 
-            print("Image None!")
-
-        # create target image and copy sample image into it
-        (wt, ht) = imgSize
-        (h, w) = img.shape
-        fx = w / wt
-        fy = h / ht
-        f = max(fx, fy)
-        newSize = (max(min(wt, int(w / f)), 1),
-                max(min(ht, int(h / f)), 1))  # scale according to f (result at least 1 and at most wt or ht)
-        img = cv2.resize(img, newSize, interpolation=cv2.INTER_CUBIC) # INTER_CUBIC interpolation best approximate the pixels image
-                                                                # see this https://stackoverflow.com/a/57503843/7338066
-        most_freq_pixel=self.find_dominant_color(Image.fromarray(img))
-        target = np.ones([ht, wt]) * most_freq_pixel  
-        target[0:newSize[1], 0:newSize[0]] = img
-
-        img = target
-
-        return img
-
-    def process_text(self, text, max_len):
+    def process_text(self, text):
         """ Process text """
-        text = text[:-1]
-        # Split the label
-        text = tf.strings.unicode_split(text, input_encoding="UTF-8")
-        # Map the characters in label to numbers
-        text = self.char_to_num(text)
-        text = text.numpy()
-        #text = np.pad(text, (0, max_len - len(text)), 'constant', constant_values=(0))
-        return text
-
-    def encode_to_labels(self, txt, char_list):
-        # encoding each output word into digits
-        dig_lst = []
-        for index, char in enumerate(txt):
+        processed_text = []
+        for char in text:
             try:
-                dig_lst.append(char_list.index(char))
+                processed_text.append(self.char_list.index(char))
             except:
                 pass
-            
-        return dig_lst
+
+        return processed_text
 
     def get_img(self, path):
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -244,9 +202,12 @@ class Preprocessor:
         if self.line_mode:
             batch = self._create_text_line(batch)
 
-        res_imgs = tf.convert_to_tensor([self.process_img(img, len(batch.imgs))
-                    for img in batch.imgs])
+        res_imgs = np.array([self.process_img(img)
+                             for img in batch.imgs])
 
-        res_texts = tf.ragged.constant([self.process_text(text, 15)
-                    for text in batch.texts])
+        res_texts = np.array([self.process_text(text)
+                              for text in batch.texts])
+        res_texts = tf.keras.utils.pad_sequences(
+            res_texts, maxlen=self.max_len, padding='post', value=len(self.char_list))
+
         return Batch(res_imgs, res_texts)

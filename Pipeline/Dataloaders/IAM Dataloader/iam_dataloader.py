@@ -18,6 +18,7 @@ class DataLoaderIAM(DataLoader):
                     val_percent: float, test_percent: float, img_num: int) -> None:
         super().__init__(data_dir, batch_size, train_percent, val_percent, test_percent, img_num)
         self.mode = 'lines' if settings.LINE_MODE else 'words'
+        self.max_len = 0
 
         with open(data_dir / "ascii" / self.mode + ".txt", encoding='utf-8') as file:
             bad_samples = ['a01-117-05-02', 'r06-022-03-05']
@@ -44,10 +45,21 @@ class DataLoaderIAM(DataLoader):
                     continue
 
                 text = ' '.join(line_split[8:])
+
+                if(len(text) == 54):
+                    continue
+
+                if (self.max_len < len(text)):
+                    self.max_len = len(text) 
                 self.samples.append(Sample(text, file_name))
                 i += 1
 
+    def get_max_len(self):
+        """ Return max text len """
+        return self.max_len
+
     def split(self) -> Tuple:
+        """ Split dataset to train, validation and test """
         train_idx = int(settings.TRAIN_PERCENT * len(self.samples))
         val_idx = train_idx + \
             int(settings.VAL_PERCENT * len(self.samples))

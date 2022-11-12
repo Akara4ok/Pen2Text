@@ -14,9 +14,9 @@ from utils_types import Sample
 class DataLoaderIAM(DataLoader):
     """Class for loading and spliting IAM dataset"""
 
-    def __init__(self, data_dir: Path, batch_size: int, train_percent: float,
+    def __init__(self, data_dir: Path, train_percent: float,
                     val_percent: float, test_percent: float, img_num: int) -> None:
-        super().__init__(data_dir, batch_size, train_percent, val_percent, test_percent, img_num)
+        super().__init__(data_dir, train_percent, val_percent, test_percent, img_num)
         self.mode = 'lines' if settings.LINE_MODE else 'words'
         self.max_len = 0
 

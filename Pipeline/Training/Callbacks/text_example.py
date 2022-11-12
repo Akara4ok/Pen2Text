@@ -14,7 +14,7 @@ class CallbackEval(tf.keras.callbacks.Callback):
         self.char_list = char_list
 
     def on_epoch_end(self, epoch: int, logs=None):
-        # predict outputs on validation images
+        """ predict outputs on validation images """
         predictions = []
         targets = []
         dataset = self.dataset.shuffle(

@@ -1,7 +1,9 @@
 """ Different utils function """
-import sys
+
 import numpy as np
 import tensorflow as tf
+import os
+import cv2
 
 def read_charlist(file_path: str):
     """ Read possible char lists from file """
@@ -30,3 +32,23 @@ def decode_batch_predictions(pred: tf.Tensor, num_to_char: tf.keras.layers) -> l
         result = tf.strings.reduce_join(num_to_char(result)).numpy().decode("utf-8")
         output_text.append(result)
     return output_text
+
+def last_checkpoint(checkpoint_dir, begin_pos = 3, end_pos = 7, filename_end_pos = 12):
+    """ Get last checkpoint in directory """
+    res_filename = ""
+    max_epoch = -1
+    for filename in os.listdir(checkpoint_dir):
+        try:
+            epoch_number = filename[begin_pos:end_pos]
+            if(max_epoch < int(epoch_number)):
+                max_epoch = int(epoch_number)
+                res_filename = filename[:filename_end_pos]
+        except:
+            pass
+    return max_epoch, res_filename
+
+
+def get_img(path):
+    """ Read image """
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    return img

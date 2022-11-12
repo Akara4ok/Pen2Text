@@ -4,7 +4,6 @@ from email.policy import default
 import random
 from typing import Tuple
 
-import os
 import sys
 import cv2
 import numpy as np
@@ -15,6 +14,7 @@ import model_settings as settings
 sys.path.append('Pipeline/utils')
 from utils_types import Batch
 from utils_types import Sample
+from utils import get_img
 
 
 class Preprocessor:
@@ -194,13 +194,9 @@ class Preprocessor:
         #print("---------", processed_text, "-----------")
         return processed_text
 
-    def get_img(self, path):
-        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        return img
-
     def process_single(self, path: tf.Tensor, text: tf.Tensor) -> Sample:
         """ Process single img and text to img """
-        img = self.get_img(path.numpy().decode("utf-8"))
+        img = get_img(path.numpy().decode("utf-8"))
         res_img = self.process_img(img)
         res_text = self.process_text(text.numpy().decode("utf-8"))
         return (res_img, res_text)

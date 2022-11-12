@@ -14,6 +14,7 @@ sys.path.append('Pipeline/')
 import model_settings as settings
 sys.path.append('Pipeline/utils')
 from utils_types import Batch
+from utils_types import Sample
 
 
 class Preprocessor:
@@ -183,18 +184,26 @@ class Preprocessor:
 
     def process_text(self, text):
         """ Process text """
+        #print("---------", text, "-----------")
         processed_text = []
         for char in text:
             try:
                 processed_text.append(self.char_list.index(char))
             except:
                 pass
-
+        #print("---------", processed_text, "-----------")
         return processed_text
 
     def get_img(self, path):
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         return img
+
+    def process_single(self, path: tf.Tensor, text: tf.Tensor) -> Sample:
+        """ Process single img and text to img """
+        img = self.get_img(path.numpy().decode("utf-8"))
+        res_img = self.process_img(img)
+        res_text = self.process_text(text.numpy().decode("utf-8"))
+        return (res_img, res_text)
 
     def process_batch(self, batch: Batch) -> Batch:
         """ Process batch of input"""

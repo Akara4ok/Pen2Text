@@ -3,12 +3,20 @@ import sys
 import numpy as np
 import tensorflow as tf
 
-def read_charlist(file_path):
+def read_charlist(file_path: str):
     """ Read possible char lists from file """
     char_list_file = open(file_path)
     line = char_list_file.readline()
     charlist = [x for x in line]
     return charlist
+
+def simple_decode(pred: tf.Tensor, char_list: list) -> str:
+    """ Decode one sample with simple decoding """
+    res = ''
+    for c in pred:
+        if int(c) != -1 and int(c) != len(char_list):
+            res += char_list[int(c)]
+    return res
 
 
 def decode_batch_predictions(pred: tf.Tensor, num_to_char: tf.keras.layers) -> list:

@@ -1,9 +1,10 @@
+
+
 """ Pipeline for training model """
 import sys
-import time
 from path import Path
-import cv2
 import tensorflow as tf
+from keras.callbacks import ModelCheckpoint
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
 from iam_dataloader import DataLoaderIAM
@@ -21,41 +22,48 @@ sys.path.append('Pipeline/Training/Callbacks')
 from text_example import CallbackEval
 sys.path.append('Pipeline/Preprocessing')
 from preprocessor import Preprocessor
-import numpy as np
 
-
-import fnmatch
-import cv2
-import numpy as np
-import string
-import time
-
-from keras.utils import pad_sequences
-
-from keras.layers import Dense, LSTM, Reshape, BatchNormalization, Input, Conv2D, MaxPool2D, Lambda, Bidirectional
-from keras.models import Model
-from keras.activations import relu, sigmoid, softmax
-import keras.backend as K
-from keras.utils import to_categorical
-from keras.callbacks import ModelCheckpoint
-import os
-import tensorflow as tf
-import random
-import matplotlib.pyplot as plt
-from PIL import Image
-from sklearn.utils import shuffle
 
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"), 10,
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
 train, val, test = data_loader.split()
-max_len = data_loader.get_max_len()
 
 char_list = read_charlist("./Pipeline/CharList.txt")
+max_len = data_loader.get_max_len()
 
-train_dataset = IAMSequence(train[0], train[1], settings.BATCH_SIZE, char_list, max_len, 'train')
-val_dataset = IAMSequence(val[0], val[1], settings.BATCH_SIZE, char_list, max_len, 'val')
 
+preprocessor = Preprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
+train_dataset = tf.data.Dataset.from_tensor_slices(
+    (train[0], train[1])
+    ).map(
+        lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.uint8]), 
+        num_parallel_calls=tf.data.AUTOTUNE
+        ).padded_batch(
+            settings.BATCH_SIZE, 
+            padded_shapes=([None, None, 1], [None]),
+            padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
+            ).shuffle(
+                settings.IMG_NUM,
+                reshuffle_each_iteration=True
+                ).prefetch(buffer_size=tf.data.AUTOTUNE)
+
+val_dataset = tf.data.Dataset.from_tensor_slices(
+    (val[0], val[1])
+    ).map(
+        lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.uint8]), 
+        num_parallel_calls=tf.data.AUTOTUNE
+        ).padded_batch(
+            settings.BATCH_SIZE, 
+            padded_shapes=([None, None, 1], [None]),
+            padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
+            ).prefetch(buffer_size=tf.data.AUTOTUNE)
+
+model=ImprovedPen2Text(char_list)
+model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
+
+
+ 
 filepath="/home/vlad/Projects/Pen2Text/Checkpoints/Test/cp-{epoch:04d}.ckpt"
 checkpoint = ModelCheckpoint(filepath=filepath, 
                              monitor='val_loss', 
@@ -64,17 +72,13 @@ checkpoint = ModelCheckpoint(filepath=filepath,
                              save_best_only=True, 
                              mode='auto')
 
-callbacks_list=[checkpoint]
+validation_callback = CallbackEval(val_dataset, model, char_list)
+callbacks_list = [checkpoint, validation_callback]
 
-
-model=ImprovedPen2Text(char_list)
-model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
-
-value = train_dataset[0]
 epochs = 30
 model.fit(
     train_dataset,
     epochs = epochs, 
     validation_data = val_dataset,
-    verbose = 1, 
+    verbose = 1,
     callbacks = callbacks_list)

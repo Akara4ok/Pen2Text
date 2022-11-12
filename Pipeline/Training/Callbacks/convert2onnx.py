@@ -1,6 +1,7 @@
 """Converting best model to onnx."""
-import tensorflow as tf
+import os
 import subprocess
+import tensorflow as tf
 
 class ConvertCallback(tf.keras.callbacks.Callback):
     """Converting best model to onnx."""
@@ -13,6 +14,8 @@ class ConvertCallback(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch: int, logs=None):
         """Converting best model to onnx."""
+        if not os.path.exists(os.path.dirname(self.onnx_path)):
+            os.makedirs(os.path.dirname(self.onnx_path))
         if logs.get("val_loss") < self.best_val:
             self.best_val = logs.get("val_loss")
             print("Val loss improved, converting model to", self.onnx_path)

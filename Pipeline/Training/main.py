@@ -4,6 +4,7 @@
 import sys
 from path import Path
 import tensorflow as tf
+import datetime
 from keras.callbacks import ModelCheckpoint
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
@@ -61,11 +62,13 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
+model_name = "Test"
 
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
-checkpoint_dir = "./Checkpoints/Test/"
+checkpoint_dir = "./Checkpoints/" + model_name + "/"
+
 loadFromCheckpoint = True
 init_epoch = 0
 if(loadFromCheckpoint):
@@ -80,17 +83,20 @@ checkpoint = ModelCheckpoint(filepath=checkpoint_path,
                              save_weights_only = True, 
                              mode='auto')
 
-tf_path = "./Models/Test/tf"
+tf_path = "./Models/" + model_name + "/tf"
 fullModelSave = ModelCheckpoint(filepath=tf_path, 
                              monitor='val_loss', 
                              verbose=1,
                              save_best_only=True,
                              mode='auto')
-onnx_path = "./Models/Test/onnx/model.onnx"
+onnx_path = "./Models/" + model_name + "/onnx/model.onnx"
 convert = ConvertCallback(tf_path, onnx_path)
 
 validation_callback = CallbackEval(val_dataset, model, char_list)
-callbacks_list = [checkpoint, fullModelSave, convert, validation_callback]
+
+log_dir = "Logs/" + model_name + "/"
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+callbacks_list = [checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
 
 epochs = 30
 model.fit(

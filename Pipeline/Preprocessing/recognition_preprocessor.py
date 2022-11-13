@@ -17,7 +17,7 @@ from utils_types import Sample
 from utils import get_img
 
 
-class Preprocessor:
+class RecognitionPreprocessor:
     """ Class for preprocessing for images """
 
     def __init__(self,

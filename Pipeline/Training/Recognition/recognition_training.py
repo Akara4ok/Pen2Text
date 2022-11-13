@@ -24,7 +24,7 @@ sys.path.append('Pipeline/Training/Callbacks')
 from text_example import CallbackEval
 from convert2onnx import ConvertCallback
 sys.path.append('Pipeline/Preprocessing')
-from preprocessor import Preprocessor
+from recognition_preprocessor import RecognitionPreprocessor
 
 
 #read dataset
@@ -36,7 +36,7 @@ char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN
 
 
-preprocessor = Preprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
+preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 train_dataset = tf.data.Dataset.from_tensor_slices(
     (train[0], train[1])
     ).map(
@@ -62,14 +62,14 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "Test"
+model_name = "ImprovedPen2Text_v2"
 
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
 checkpoint_dir = "./Checkpoints/" + model_name + "/"
 
-loadFromCheckpoint = True
+loadFromCheckpoint = False
 init_epoch = 0
 if(loadFromCheckpoint):
     init_epoch, checkpoint_name = last_checkpoint(checkpoint_dir)

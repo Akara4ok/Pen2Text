@@ -11,7 +11,7 @@ import model_settings as settings
 sys.path.append('Pipeline/utils')
 from utils_types import Batch
 sys.path.append('Pipeline/Preprocessing')
-from preprocessor import Preprocessor
+from recognition_preprocessor import RecognitionPreprocessor
 
 
 class IAMSequence(tf.keras.utils.Sequence):
@@ -24,7 +24,7 @@ class IAMSequence(tf.keras.utils.Sequence):
         self.char_list = char_list
         self.curr_idx = 0
         self.mode = mode
-        self.preprocessor = Preprocessor(img_size=(
+        self.preprocessor = RecognitionPreprocessor(img_size=(
             settings.HEIGHT, settings.WIDTH), char_list=self.char_list, max_len=max_len, batch_size=self.batch_size)
 
     @abc.abstractmethod

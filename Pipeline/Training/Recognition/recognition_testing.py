@@ -10,23 +10,24 @@ sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
 from iam_dataloader import DataLoaderIAM
 sys.path.append('Pipeline/')
 import model_settings as settings
-from loss_functions import ctc_loss
 sys.path.append('Pipeline/utils')
 from utils import read_charlist
 sys.path.append('Pipeline/Preprocessing')
-from preprocessor import Preprocessor
+from recognition_preprocessor import RecognitionPreprocessor
 sys.path.append('Pipeline/utils')
 from utils import simple_decode
+sys.path.append('Pipeline/Postprocessing')
+from spell_correction import correction
 
 #read dataset
-data_loader = DataLoaderIAM(Path("Data/IAM Dataset"), 10,
+data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
 train, val, test = data_loader.split()
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = data_loader.get_max_len()
 
-preprocessor = Preprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
+preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 
 test_dataset = tf.data.Dataset.from_tensor_slices(
     (val[0], val[1])
@@ -39,7 +40,8 @@ test_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model=tf.keras.models.load_model("./Models/Test/tf", custom_objects={"ctc_loss": ctc_loss})
+model_name = "ImprovedPen2Text_v1"
+model=tf.keras.models.load_model("./Models/" + model_name + "/tf", compile=False)
 
 correct = 0
 targets = []
@@ -54,6 +56,12 @@ for batch_index, batch in enumerate(test_dataset):
         batch_correct = 0
         target = simple_decode(y[i], char_list)
         label = simple_decode(x, char_list)
+        # print("-" * 100)
+        # print("Original:", target)
+        # print("Predicted:", label)
+        if(label.isalpha()):
+            label = correction(label)
+            # print("Corrected:", label)
         targets.append(target)
         labels.append(label)
         if(label == target):

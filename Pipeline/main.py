@@ -13,7 +13,12 @@ sys.path.append('Pipeline/utils')
 from utils import simple_decode
 from utils import read_charlist
 sys.path.append('Pipeline/Preprocessing')
-from preprocessor import Preprocessor
+from recognition_preprocessor import RecognitionPreprocessor
+sys.path.append('Pipeline/Postprocessing')
+from spell_correction import correction
+
+
+
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN
@@ -25,7 +30,7 @@ dataloader = InferenceDataloader(Path("TestInference/Recognitions"))
 filenames = dataloader.get_filenames()
 imgs = dataloader.get_images()
 
-preprocessor = Preprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
+preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 processed_imgs = [preprocessor.process_img(img) for img in imgs]
 
 labels = []

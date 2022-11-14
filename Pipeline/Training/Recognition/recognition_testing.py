@@ -22,7 +22,7 @@ from spell_correction import correction
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split()
+train, val, test = data_loader.split_for_recognition()
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = data_loader.get_max_len()

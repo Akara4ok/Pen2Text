@@ -28,7 +28,3 @@ class InferenceDataloader(DataLoader):
     def get_images(self) -> list:
         """ Return images from dataloader """
         return self.samples
-
-    def split(self) -> Tuple:
-        """ Not implemented for inference """
-        pass

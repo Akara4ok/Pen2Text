@@ -1,10 +1,9 @@
 
 
-""" Pipeline for training model """
+""" Pipeline for training recognition model """
 import sys
 from path import Path
 import tensorflow as tf
-import datetime
 from keras.callbacks import ModelCheckpoint
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
@@ -30,7 +29,7 @@ from recognition_preprocessor import RecognitionPreprocessor
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split()
+train, val, test = data_loader.split_for_recognition()
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN

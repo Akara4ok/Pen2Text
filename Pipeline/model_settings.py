@@ -9,6 +9,7 @@ VAL_PERCENT = 0.1
 TEST_PERCENT = 0.2
 CHAR_DIR = 'Pipeline/CharList.txt'
 IMG_NUM = 120000
+RANDOM_SEED = 42
 
 #preprocessing constants
 WIDTH = 128

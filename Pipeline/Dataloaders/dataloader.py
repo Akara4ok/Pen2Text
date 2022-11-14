@@ -24,8 +24,3 @@ class DataLoader(metaclass=abc.ABCMeta):
         self.img_num = img_num
 
         self.samples = []
-
-    @abc.abstractmethod
-    def split(self) -> Tuple:
-        """ Split data to (x_train, y_train), (x_train, y_train), (x_train, y_train)
-        where x -- file_path and y -- word"""

@@ -18,8 +18,6 @@ sys.path.append('Pipeline/Postprocessing')
 from spell_correction import correction
 
 
-
-
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN
 

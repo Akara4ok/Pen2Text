@@ -8,7 +8,7 @@ from keras.callbacks import ModelCheckpoint
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
 from iam_dataloader import DataLoaderIAM
-sys.path.append('Pipeline/Dataset/IAM Dataset/')
+sys.path.append('Pipeline/Dataset/IAM Dataset Sequence/')
 from iam_sequence import IAMSequence
 sys.path.append('Pipeline/')
 import model_settings as settings
@@ -22,6 +22,7 @@ from utils import last_checkpoint
 sys.path.append('Pipeline/Training/Callbacks')
 from text_example import CallbackEval
 from convert2onnx import ConvertCallback
+from scheduler import scheduler
 sys.path.append('Pipeline/Preprocessing')
 from recognition_preprocessor import RecognitionPreprocessor
 
@@ -29,7 +30,7 @@ from recognition_preprocessor import RecognitionPreprocessor
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split_for_recognition()
+train, val, test = data_loader.split_for_recognition(random_seed=settings.RANDOM_SEED)
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN
@@ -38,16 +39,16 @@ max_len = settings.MAX_LEN
 preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 train_dataset = tf.data.Dataset.from_tensor_slices(
     (train[0], train[1])
-    ).map(
-        lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.uint8]), 
-        num_parallel_calls=tf.data.AUTOTUNE
-        ).padded_batch(
-            settings.BATCH_SIZE, 
-            padded_shapes=([None, None, 1], [None]),
-            padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
-            ).shuffle(
-                settings.IMG_NUM,
-                reshuffle_each_iteration=True
+    ).shuffle(
+        settings.IMG_NUM,
+        reshuffle_each_iteration=True
+        ).map(
+            lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.uint8]), 
+            num_parallel_calls=tf.data.AUTOTUNE
+            ).padded_batch(
+                settings.BATCH_SIZE, 
+                padded_shapes=([None, None, 1], [None]),
+                padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
                 ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
 val_dataset = tf.data.Dataset.from_tensor_slices(
@@ -61,10 +62,10 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v2"
+model_name = "ImprovedPen2Text_v4"
 
 model=ImprovedPen2Text(char_list)
-model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
+model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.SGD(learning_rate=0.0001))
 
 checkpoint_dir = "./Checkpoints/" + model_name + "/"
 
@@ -95,7 +96,10 @@ validation_callback = CallbackEval(val_dataset, model, char_list)
 
 log_dir = "Logs/" + model_name + "/"
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-callbacks_list = [checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
+
+lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)
+
+callbacks_list = [lr_callback, checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
 
 epochs = 30
 model.fit(

@@ -22,7 +22,7 @@ from utils import last_checkpoint
 sys.path.append('Pipeline/Training/Callbacks')
 from text_example import CallbackEval
 from convert2onnx import ConvertCallback
-from scheduler import scheduler
+# from scheduler import scheduler
 sys.path.append('Pipeline/Preprocessing')
 from recognition_preprocessor import RecognitionPreprocessor
 
@@ -30,7 +30,7 @@ from recognition_preprocessor import RecognitionPreprocessor
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split_for_recognition(random_seed=settings.RANDOM_SEED)
+train, val, test = data_loader.split_for_recognition(shuffle=False)
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = settings.MAX_LEN
@@ -62,10 +62,10 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v4"
+model_name = "ImprovedPen2Text_v6"
 
 model=ImprovedPen2Text(char_list)
-model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.SGD(learning_rate=0.0001))
+model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
 checkpoint_dir = "./Checkpoints/" + model_name + "/"
 
@@ -97,9 +97,9 @@ validation_callback = CallbackEval(val_dataset, model, char_list)
 log_dir = "Logs/" + model_name + "/"
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)
+# lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)
 
-callbacks_list = [lr_callback, checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
+callbacks_list = [checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
 
 epochs = 30
 model.fit(

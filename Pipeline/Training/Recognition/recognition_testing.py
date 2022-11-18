@@ -22,7 +22,7 @@ from spell_correction import correction
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split_for_recognition()
+train, val, test = data_loader.split_for_recognition(shuffle=False)
 
 char_list = read_charlist("./Pipeline/CharList.txt")
 max_len = data_loader.get_max_len()
@@ -40,7 +40,7 @@ test_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v1"
+model_name = "ImprovedPen2Text_v3"
 model=tf.keras.models.load_model("./Models/" + model_name + "/tf", compile=False)
 
 correct = 0

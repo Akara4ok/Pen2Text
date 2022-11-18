@@ -15,7 +15,7 @@ sys.path.append('Pipeline/utils')
 from utils_types import Batch
 from utils_types import Sample
 from utils import get_img
-
+from PIL import Image
 
 class RecognitionPreprocessor:
     """ Class for preprocessing for images """
@@ -182,6 +182,48 @@ class RecognitionPreprocessor:
         res_image = np.expand_dims(res_image,axis=-1)
         return res_image
 
+
+    def find_dominant_color(self, image):
+        #Resizing parameters
+        width, height = 150,150
+        image = image.resize((width, height),resample = 0)
+        #Get colors from image object
+        pixels = image.getcolors(width * height)
+        #Sort them by count number(first element of tuple)
+        sorted_pixels = sorted(pixels, key=lambda t: t[0])
+        #Get the most frequent color
+        dominant_color = sorted_pixels[-1][1]
+        return dominant_color
+
+    def preprocess_img2(self, img):
+        "put img into target img of size imgSize, transpose for TF and normalize gray-values"
+
+        # there are damaged files in IAM dataset - just use black image instead
+        imgSize = (128, 32)
+        if img is None:
+            img = np.zeros([imgSize[1], imgSize[0]]) 
+            print("Image None!")
+
+        # create target image and copy sample image into it
+        (wt, ht) = imgSize
+        (h, w) = img.shape
+        fx = w / wt
+        fy = h / ht
+        f = max(fx, fy)
+        newSize = (max(min(wt, int(w / f)), 1),
+                max(min(ht, int(h / f)), 1))  # scale according to f (result at least 1 and at most wt or ht)
+        img = cv2.resize(img, newSize, interpolation=cv2.INTER_CUBIC) # INTER_CUBIC interpolation best approximate the pixels image
+                                                                # see this https://stackoverflow.com/a/57503843/7338066
+        most_freq_pixel=self.find_dominant_color(Image.fromarray(img))
+        target = np.ones([ht, wt]) * most_freq_pixel  
+        target[0:newSize[1], 0:newSize[0]] = img
+
+        img = target / 255
+        img = np.expand_dims(img,axis=-1)
+        
+
+        return img
+
     def process_text(self, text):
         """ Process text """
         #print("---------", text, "-----------")
@@ -197,7 +239,7 @@ class RecognitionPreprocessor:
     def process_single(self, path: tf.Tensor, text: tf.Tensor) -> Sample:
         """ Process single img and text to img """
         img = get_img(path.numpy().decode("utf-8"))
-        res_img = self.process_img(img)
+        res_img = self.preprocess_img2(img)
         res_text = self.process_text(text.numpy().decode("utf-8"))
         return (res_img, res_text)
 

@@ -180,19 +180,19 @@ class DataLoaderIAM(DataLoader):
             int(settings.VAL_PERCENT * len(lines))
         
         train_forms_path = [self.dataset[x.form_id].file_name for x in lines[:train_idx]]
-        train_line_boxes = [x.get_box() for x in lines[:train_idx]]
+        train_line_box = [x.get_box() for x in lines[:train_idx]]
         train_word_boxes = [x.get_word_boxes() for x in lines[:train_idx]]
 
         val_forms_path = [self.dataset[x.form_id].file_name for x in lines[train_idx:val_idx]]
-        val_line_boxes = [x.get_box() for x in lines[train_idx:val_idx]]
+        val_line_box = [x.get_box() for x in lines[train_idx:val_idx]]
         val_word_boxes = [x.get_word_boxes() for x in lines[train_idx:val_idx]]
 
         test_forms_path = [self.dataset[x.form_id].file_name for x in lines[val_idx:]]
-        test_line_boxes = [x.get_box() for x in lines[val_idx:]]
+        test_line_box = [x.get_box() for x in lines[val_idx:]]
         test_word_boxes = [x.get_word_boxes() for x in lines[val_idx:]]
 
-        return ((train_forms_path, train_line_boxes, train_word_boxes),
-                (val_forms_path, val_line_boxes, val_word_boxes),
-                (test_forms_path, test_line_boxes, test_word_boxes))
+        return ((train_forms_path, train_line_box, train_word_boxes),
+                (val_forms_path, val_line_box, val_word_boxes),
+                (test_forms_path, test_line_box, test_word_boxes))
 
 

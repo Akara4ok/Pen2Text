@@ -22,7 +22,7 @@ from utils import last_checkpoint
 sys.path.append('Pipeline/Training/Callbacks')
 from text_example import CallbackEval
 from convert2onnx import ConvertCallback
-from scheduler import hardcoded_scheduler_adam
+from scheduler import scheduler
 sys.path.append('Pipeline/Preprocessing')
 from recognition_preprocessor import RecognitionPreprocessor
 
@@ -97,9 +97,9 @@ validation_callback = CallbackEval(val_dataset, model, char_list)
 log_dir = "Logs/" + model_name + "/"
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-lr_callback = tf.keras.callbacks.LearningRateScheduler(hardcoded_scheduler_adam)
+lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)
 
-callbacks_list = [lr_callback]
+callbacks_list = [lr_callback, checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
 
 epochs = 30
 model.fit(

@@ -52,6 +52,7 @@ class Line():
 
     def get_word_boxes(self):
         word_array = list(self.words.values())
+        # print(len(word_array))
         bounding_boxes = []
         for word in word_array:
             bounding_boxes.append((word.x, word.y, word.width, word.height))
@@ -78,10 +79,10 @@ class Word():
         self.form_id = file_name_split[0] + "-" + file_name_split[1]
         self.line_id = file_name_split[2]
         self.full_id = line_split[0]
-        self.x = line_split[3]
-        self.y = line_split[4]
-        self.width = line_split[5]
-        self.height = line_split[6]
+        self.x = int(line_split[3])
+        self.y = int(line_split[4])
+        self.width = int(line_split[5])
+        self.height = int(line_split[6])
         self.text = text
         self.file_name = file_name
 

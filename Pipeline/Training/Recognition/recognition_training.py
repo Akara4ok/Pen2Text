@@ -67,7 +67,7 @@ model_name = "ImprovedPen2Text_v6"
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
-checkpoint_dir = "./Checkpoints/" + model_name + "/"
+checkpoint_dir = "./Models/Recognition/Checkpoints" + model_name + "/"
 
 loadFromCheckpoint = False
 init_epoch = 0
@@ -83,18 +83,18 @@ checkpoint = ModelCheckpoint(filepath=checkpoint_path,
                              save_weights_only = True, 
                              mode='auto')
 
-tf_path = "./Models/" + model_name + "/tf"
+tf_path = "./Models/Recognition/Models/" + model_name + "/tf"
 fullModelSave = ModelCheckpoint(filepath=tf_path, 
                              monitor='val_loss', 
                              verbose=1,
                              save_best_only=True,
                              mode='auto')
-onnx_path = "./Models/" + model_name + "/onnx/model.onnx"
+onnx_path = "./Models/Recognition/Models/" + model_name + "/onnx/model.onnx"
 convert = ConvertCallback(tf_path, onnx_path)
 
 validation_callback = CallbackEval(val_dataset, model, char_list)
 
-log_dir = "Logs/" + model_name + "/"
+log_dir = "./Models/Recognition/Logs/" + model_name + "/"
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 # lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)

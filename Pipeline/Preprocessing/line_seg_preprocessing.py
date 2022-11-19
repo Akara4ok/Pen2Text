@@ -8,6 +8,8 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
+sys.path.append('Pipeline/Preprocessing')
+from preprocessor import Preprocessor
 sys.path.append('Pipeline/')
 import model_settings as settings
 sys.path.append('Pipeline/utils')
@@ -17,24 +19,23 @@ from utils import get_img
 from utils import custom_image_resize
 
 
-class LineSegPreprocessor:
+class LineSegPreprocessor(Preprocessor):
     """ Class for preprocessing for images """
 
     def __init__(self,
                  img_size: Tuple[int, int],
                  batch_size: int) -> None:
 
-        self.img_size = img_size
-        self.batch_size = batch_size
+        super().__init__(img_size, batch_size)
 
     def process_single(self, path: tf.Tensor, line_box: tf.Tensor, bounding_boxes: tf.Tensor) -> Tuple:
         """ Create mask for single line """
 
-        img = get_img(path)
-        (x_line, y_line, width_line, height_line) = line_box
+        img = get_img(path.numpy().decode("utf-8"))
+        (x_line, y_line, width_line, height_line) = line_box.numpy()
         img_line = img[y_line:y_line+height_line, x_line:x_line+width_line]
         mask = np.zeros_like(img)
-        for x, y, w, h in bounding_boxes:
+        for x, y, w, h in bounding_boxes.numpy():
             mask[y:y+h, x:x+w] = 255
 
         mask = mask[y_line:y_line+height_line, x_line:x_line+width_line]
@@ -63,8 +64,14 @@ class LineSegPreprocessor:
             mask = np.concatenate((mask,to_pad), axis=0)
         
         (height, width) = img_line.shape[:2]
+
         img_line = cv2.resize(img_line, self.img_size)
+        img_line = img_line / 255
+        img_line = np.expand_dims(img_line,axis=-1)
+
         mask = cv2.resize(mask, self.img_size)
+        mask = mask / 255
+        mask = np.expand_dims(mask,axis=-1)
 
         return img_line, mask
     

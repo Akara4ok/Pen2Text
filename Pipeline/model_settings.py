@@ -2,6 +2,7 @@
 
 #general
 BATCH_SIZE = 10
+BATCH_SIZE_SEG = 1
 
 #data loader constants
 TRAIN_PERCENT = 0.7

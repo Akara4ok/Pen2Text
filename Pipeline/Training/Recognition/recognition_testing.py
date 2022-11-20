@@ -41,7 +41,7 @@ test_dataset = tf.data.Dataset.from_tensor_slices(
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
 model_name = "ImprovedPen2Text_v3"
-model=tf.keras.models.load_model("./Models/" + model_name + "/tf", compile=False)
+model=tf.keras.models.load_model("./Models/Recognition/Models/" + model_name + "/tf", compile=False)
 
 correct = 0
 targets = []

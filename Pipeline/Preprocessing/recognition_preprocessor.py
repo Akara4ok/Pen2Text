@@ -91,28 +91,8 @@ class RecognitionPreprocessor(Preprocessor):
         if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1) or (img.shape[0] / img.shape[1] < 0.05):
             img = np.zeros(self.img_size)
 
+        _, img = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY_INV)
         res_image = img
-        if self.clustered_in_batch / self.batch_size < self.clustering_percent:
-            # numpy reshape operation -1 unspecified
-            pixel_vals = img.reshape((-1, 1))
-            pixel_vals = np.float32(pixel_vals)
-            criteria = (cv2.TERM_CRITERIA_EPS +
-                        cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
-            k = 2
-
-            _, labels, centers = cv2.kmeans(
-                pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-
-            if centers[0] > centers[1]:
-                labels = 1 - labels
-
-            centers = np.array([[0], [255]])
-
-            # Mapping labels to center points( RGB Value)
-            segmented_data = centers[labels.flatten()]
-            segmented_image = segmented_data.reshape((img.shape))
-            self.clustered_in_batch += 1
-            res_image = segmented_image
 
         if self.data_augmentation:
             height, width = self.img_size

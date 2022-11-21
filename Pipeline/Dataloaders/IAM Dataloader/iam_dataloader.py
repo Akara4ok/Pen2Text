@@ -95,6 +95,9 @@ class DataLoaderIAM(DataLoader):
                 if(len(text) == 54):
                     continue
 
+                if line_split[3] == '-1':
+                    continue
+
                 word = Word(data_dir, line_split)
                 self.dataset[word.form_id].add_word(word.line_id, word.id, word)
 
@@ -194,5 +197,31 @@ class DataLoaderIAM(DataLoader):
         return ((train_forms_path, train_line_box, train_word_boxes),
                 (val_forms_path, val_line_box, val_word_boxes),
                 (test_forms_path, test_line_box, test_word_boxes))
+        
 
+    def split_for_word_segmentation(self, shuffle = True, random_seed = None) -> Tuple:
+        """ Split dataset to train, validation and test """
+        forms = list(self.dataset.values())
+        if shuffle:
+            if random_seed:
+                random.Random(random_seed).shuffle(forms)
+            else:
+                random.shuffle(forms)
 
+        
+        train_idx = int(settings.TRAIN_PERCENT * len(forms))
+        val_idx = train_idx + \
+            int(settings.VAL_PERCENT * len(forms))
+        
+        train_forms_path = [x.file_name for x in forms[:train_idx]]
+        train_line_boxes = [x.get_word_boxes() for x in forms[:train_idx]]
+
+        val_forms_path = [x.file_name for x in forms[train_idx:val_idx]]
+        val_line_boxes = [x.get_word_boxes() for x in forms[train_idx:val_idx]]
+
+        test_forms_path = [x.file_name for x in forms[val_idx:]]
+        test_line_boxes = [x.get_word_boxes() for x in forms[val_idx:]]
+
+        return ((train_forms_path, train_line_boxes),
+                (val_forms_path, val_line_boxes),
+                (test_forms_path, test_line_boxes))

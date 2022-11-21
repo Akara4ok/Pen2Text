@@ -22,6 +22,13 @@ class Form():
         for line in line_array:
             bounding_boxes.append((line.x, line.y, line.width, line.height))
         return bounding_boxes
+    
+    def get_word_boxes(self):
+        line_array = list(self.lines.values())
+        bounding_boxes = []
+        for line in line_array:
+            bounding_boxes.extend(line.get_word_boxes())
+        return bounding_boxes
 
 class Line():
     """Class for representing lines"""

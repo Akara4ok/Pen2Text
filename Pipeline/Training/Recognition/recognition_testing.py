@@ -40,7 +40,7 @@ test_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v3"
+model_name = "ImprovedPen2Text_v7"
 model=tf.keras.models.load_model("./Models/Recognition/Models/" + model_name + "/tf", compile=False)
 
 correct = 0

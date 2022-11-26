@@ -28,6 +28,31 @@ class LineSegPreprocessor(Preprocessor):
 
         super().__init__(img_size, batch_size)
 
+    def process_img(self, img_line):     
+        (height, width) = img_line.shape[:2]
+
+
+        if(width > 512):
+            img_line = custom_image_resize(img_line, width=512)
+        else:
+            to_pad = np.zeros((height,512-width))
+            img_line = np.concatenate((img_line,to_pad),axis=1)
+        
+        (height, width) = img_line.shape[:2]
+
+        if(height > 512):
+            img_line = custom_image_resize(img_line, height=512)
+        else:
+            to_pad=np.zeros((512-height,width))
+            img_line=np.concatenate((img_line,to_pad), axis=0)
+        
+        (height, width) = img_line.shape[:2]
+
+        img_line = cv2.resize(img_line, self.img_size)
+        img_line = np.expand_dims(img_line,axis=-1)
+
+        return img_line
+
     def process_single(self, path: tf.Tensor, line_box: tf.Tensor, bounding_boxes: tf.Tensor) -> Tuple:
         """ Create mask for single line """
 

@@ -91,7 +91,6 @@ class RecognitionPreprocessor(Preprocessor):
         if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1) or (img.shape[0] / img.shape[1] < 0.05):
             img = np.zeros(self.img_size)
 
-        _, img = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY_INV)
         res_image = img
 
         if self.data_augmentation:
@@ -159,7 +158,88 @@ class RecognitionPreprocessor(Preprocessor):
                         x_center:x_center+old_width] = resized
                 res_image = pad_img
 
+        _, res_image = cv2.threshold(res_image, 200, 255, cv2.THRESH_BINARY_INV)
         res_image = res_image / 255
+        res_image = np.expand_dims(res_image,axis=-1)
+        return res_image
+    
+    def process_img_inference(self, img: np.ndarray) -> np.ndarray:
+        """Clusterring, resizing and apllying data augmentation."""
+        if (img is None) or (img.shape[0] <= 1 or img.shape[1] <= 1) or (img.shape[0] / img.shape[1] < 0.05):
+            img = np.zeros(self.img_size)
+
+        res_image = img
+
+        if self.data_augmentation:
+            height, width = self.img_size
+            current_height, current_width = res_image.shape
+            # photometric data augmentation
+            # TODO delete this part if accuracy will be low
+            if random.random() < 0.25:
+                def gaussian_koef():
+                    return random.randint(1, 3) * 2 + 1
+                img = cv2.GaussianBlur(
+                    img, (gaussian_koef(), gaussian_koef()), 0)
+            if random.random() < 0.25:
+                img = cv2.dilate(img, np.ones((3, 3)))
+
+            # geometric data augmentation
+            resized_koef = min(width / current_width, height / current_height)
+            resized_koef_x = resized_koef * np.random.uniform(0.75, 1.05)
+            resized_koef_y = resized_koef * np.random.uniform(0.75, 1.05)
+
+            # random position around center
+            low_xc = (width - current_width * resized_koef_x) / 2
+            low_yc = (height - current_height * resized_koef_y) / 2
+            clipped_xc = max((width - current_width * resized_koef_x) / 2, 0)
+            clipped_yc = max((height - current_height * resized_koef_y) / 2, 0)
+            xc_bias = low_xc + np.random.uniform(-clipped_xc, clipped_xc)
+            yc_bias = low_yc + np.random.uniform(-clipped_yc, clipped_yc)
+            transform_matrix = np.float32(
+                [[resized_koef_x, 0, xc_bias], [0, resized_koef_y, yc_bias]])
+            target = np.full(
+                (self.img_size[0], self.img_size[1]), 255, dtype=np.uint8)
+
+            res_image = cv2.warpAffine(res_image.astype(np.uint8), transform_matrix,
+                                       dsize=(
+                                           self.img_size[1], self.img_size[0]),
+                                       flags=cv2.INTER_AREA, dst=target,
+                                       borderMode=cv2.BORDER_TRANSPARENT)
+
+        else:
+            # general preprocessing
+            old_width = img.shape[1]
+            old_height = img.shape[0]
+            scale_percent = min(
+                self.img_size[1] / old_width, self.img_size[0] / old_height)
+
+            width = int(img.shape[1] * scale_percent)
+            height = int(img.shape[0] * scale_percent)
+            resized = cv2.resize(res_image.astype('float32'),
+                                 (width, height), interpolation=cv2.INTER_AREA)
+
+            # add padding or crop image
+            if not self.line_mode:
+                color = 1
+                new_height = self.img_size[0]
+                new_width = self.img_size[1]
+                old_height = resized.shape[0]
+                old_width = resized.shape[1]
+                pad_img = np.full(
+                    (self.img_size[0], self.img_size[1]), color, dtype=np.float32)
+
+                # compute center offset
+                y_center = max((new_height - old_height) // 2, 0)
+                x_center = max((new_width - old_width) // 2, 0)
+
+                pad_img[y_center:y_center+height,
+                        x_center:x_center+width] = resized
+                res_image = pad_img
+                
+                print(pad_img[y_center:y_center+height,
+                        x_center:x_center+width])
+                cv2.imshow("img", res_image)
+                cv2.waitKey(0)
         res_image = np.expand_dims(res_image,axis=-1)
         return res_image
 

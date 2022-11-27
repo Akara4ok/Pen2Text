@@ -171,7 +171,7 @@ class RecognitionPreprocessor(Preprocessor):
         if (not isInference):
             _, res_image = cv2.threshold(res_image, 0.8, 1, cv2.THRESH_BINARY_INV)
         else:
-            _, res_image = cv2.threshold(res_image, 0.6, 1, cv2.THRESH_BINARY)
+            _, res_image = cv2.threshold(res_image, 0.1, 1, cv2.THRESH_BINARY)
             
         res_image = np.expand_dims(res_image,axis=-1)
 

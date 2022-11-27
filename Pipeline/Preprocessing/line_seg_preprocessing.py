@@ -36,6 +36,7 @@ class LineSegPreprocessor(Preprocessor):
             _, img_line = cv2.threshold(img_line, 0.8, 1, cv2.THRESH_BINARY_INV)
 
         img_line = pad_or_resize(img_line, 512, 512)
+
         img_line = cv2.resize(img_line, self.img_size)
 
         img_line = np.expand_dims(img_line,axis=-1)

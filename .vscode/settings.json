@@ -9,6 +9,7 @@
         "./Pipeline/Training/Callbacks",
         "./Pipeline/Dataloaders/IAM Dataloader",
         "./Pipeline/Postprocessing",
-        "./Pipeline/Dataset/IAM Dataset Sequence"
+        "./Pipeline/Dataset/IAM Dataset Sequence",
+        "./Pipeline/Inference"
     ]
 }

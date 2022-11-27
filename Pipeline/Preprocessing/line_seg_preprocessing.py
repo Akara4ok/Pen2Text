@@ -17,6 +17,7 @@ from utils_types import Batch
 from utils_types import Sample
 from utils import get_img
 from utils import custom_image_resize
+from utils import pad_or_resize
 
 
 class LineSegPreprocessor(Preprocessor):
@@ -28,77 +29,48 @@ class LineSegPreprocessor(Preprocessor):
 
         super().__init__(img_size, batch_size)
 
-    def process_img(self, img_line):     
-        (height, width) = img_line.shape[:2]
+    def process_img(self, img_line, isInference = False):
+        """ Process image """
+        img_line = img_line / 255 if img_line.dtype == np.uint8 else img_line
+        if (not isInference):
+            _, img_line = cv2.threshold(img_line, 0.8, 1, cv2.THRESH_BINARY_INV)
 
-
-        if(width > 512):
-            img_line = custom_image_resize(img_line, width=512)
-        else:
-            to_pad = np.zeros((height,512-width))
-            img_line = np.concatenate((img_line,to_pad),axis=1)
-        
-        (height, width) = img_line.shape[:2]
-
-        if(height > 512):
-            img_line = custom_image_resize(img_line, height=512)
-        else:
-            to_pad=np.zeros((512-height,width))
-            img_line=np.concatenate((img_line,to_pad), axis=0)
-        
-        (height, width) = img_line.shape[:2]
-
+        img_line = pad_or_resize(img_line, 512, 512)
         img_line = cv2.resize(img_line, self.img_size)
+
         img_line = np.expand_dims(img_line,axis=-1)
 
         return img_line
 
-    def process_single(self, path: tf.Tensor, line_box: tf.Tensor, bounding_boxes: tf.Tensor) -> Tuple:
-        """ Create mask for single line """
-
-        img = get_img(path.numpy().decode("utf-8"))
-        (x_line, y_line, width_line, height_line) = line_box.numpy()
+    def create_mask(self, img, line_box: np.ndarray, bounding_boxes: np.ndarray):
+        """ Create mask for line segmentation """
+        (x_line, y_line, width_line, height_line) = line_box
         img_line = img[y_line:y_line+height_line, x_line:x_line+width_line]
         mask = np.zeros_like(img)
-        for x, y, w, h in bounding_boxes.numpy():
-            mask[y:y+h, x:x+w] = 255
+        mask = mask / 255 if mask.dtype == np.uint8 else mask
+        for x, y, w, h in bounding_boxes:
+            mask[y:y+h, x:x+w] = 1
 
         mask = mask[y_line:y_line+height_line, x_line:x_line+width_line]
-
-        _, img_line = cv2.threshold(img_line, 150, 255, cv2.THRESH_BINARY_INV)
-
-        
-        (height, width) = img_line.shape[:2]
-
-        if(width > 512):
-            img_line = custom_image_resize(img_line, width=512)
-            mask = custom_image_resize(mask, width=512)
-        else:
-            to_pad = np.zeros((height,512-width))
-            img_line = np.concatenate((img_line,to_pad),axis=1)
-            mask = np.concatenate((mask,to_pad),axis=1)
-        
-        (height, width) = img_line.shape[:2]
-
-        if(height > 512):
-            img_line = custom_image_resize(img_line, height=512)
-            mask = custom_image_resize(mask, height=512)
-        else:
-            to_pad=np.zeros((512-height,width))
-            img_line=np.concatenate((img_line,to_pad), axis=0)
-            mask = np.concatenate((mask,to_pad), axis=0)
-        
-        (height, width) = img_line.shape[:2]
-
-        img_line = cv2.resize(img_line, self.img_size)
-        img_line = img_line / 255
-        img_line = np.expand_dims(img_line,axis=-1)
-
+        mask = pad_or_resize(mask, 512, 512)
         mask = cv2.resize(mask, self.img_size)
-        mask = mask / 255
         mask = np.expand_dims(mask,axis=-1)
+        return img_line, mask
+
+    def process_single(self, x: tf.Tensor, y: tf.Tensor) -> Tuple:
+        """ Process single for line seg training """
+        img = get_img(x.numpy().decode("utf-8"))
+        line_box, bounding_boxes = y.numpy()
+        line_box = np.concatenate(line_box)
+        img_line, mask = self.create_mask(img, line_box, bounding_boxes)
+        img_line = self.process_img(img_line)
 
         return img_line, mask
+    
+    def process_inference(self, x: np.ndarray) -> np.ndarray:
+        """ Process single for line seg inference """
+        img_line = self.process_img(x, True)
+        return img_line
     
     def process_batch(self, batch: list) -> list:
         """ Create masks for whole batch """

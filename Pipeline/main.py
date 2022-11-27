@@ -80,6 +80,7 @@ for batch in train_dataset:
         result = img
         contours, hier = cv2.findContours(pred, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         line_coordinates = []
+        margin = 10
         for c in contours:
             x, y, w, h = cv2.boundingRect(c)
             line_coordinates.append((x, y, w, h))
@@ -93,25 +94,25 @@ for batch in train_dataset:
             # for line in line_coordinates:
             (x, y, w, h) = line
             img_line = np.squeeze(img[y:y+h,x:x+w], axis = 2)
-            img_line_proc = line_preprocessor.process_img(img_line)
+            img_line_proc = line_preprocessor.process_inference(img_line)
             # print(img_line_proc.shape)
             pred_word = line_model.predict(np.expand_dims(img_line_proc, axis=0))
             pred_word = (np.squeeze(pred_word, axis=0) * 255).astype('uint8')
             _, pred_word = cv2.threshold(pred_word, 100, 255, cv2.THRESH_BINARY)
             result_words = np.squeeze(img_line_proc, axis = 2)
-            print('-------', result_words.shape, '----------')
+            # print('-------', result_words.shape, '----------')
             contours, hier = cv2.findContours(pred_word, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             word_coordinates = []
             for c in contours:
                 x, y, w, h = cv2.boundingRect(c)
                 word_coordinates.append((x, y, w, h))
-                # result_words = cv2.rectangle(result_words, (x, y), (x+w,y+h), 255, 1)
+                result_words = cv2.rectangle(result_words, (x, y), (x+w,y+h), 255, 1)
             
             word_coordinates.sort(key=lambda x:x[0])
             for word in word_coordinates:
                 (x, y, w, h) = word
                 word_img = img_line[y:y+h,x:x+w]
-                processed_word = word_preprocessor.process_img_inference(word_img)
+                processed_word = word_preprocessor.process_inference(word_img)
 
                 words_imgs.append(processed_word)
                 # cv2.imshow("img", processed_word)
@@ -131,4 +132,7 @@ for batch in train_dataset:
                 # print("Corrected:", label)
             words.append(label)
         
-        print(words)
+        print("'", ' '.join(words), "'")
+        
+        cv2.imshow("img", img)
+        cv2.waitKey(0)

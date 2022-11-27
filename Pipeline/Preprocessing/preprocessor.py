@@ -18,13 +18,17 @@ class Preprocessor(ABC):
     def __init__(self,
                  img_size: Tuple[int, int],
                  batch_size: int) -> None:
-
         self.img_size = img_size
         self.batch_size = batch_size
 
     @abstractmethod
-    def process_single(self) -> Tuple:
+    def process_single(self, x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
         """ Abstract method for processing single input """
+        pass
+    
+    @abstractmethod
+    def process_inference(self, x: np.ndarray) -> np.ndarray:
+        """ Abstract method for processing single for inference"""
         pass
     
     @abstractmethod

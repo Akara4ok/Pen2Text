@@ -27,12 +27,12 @@ train, val, test = data_loader.split_for_line_segmentation(shuffle=False)
 preprocessor = LineSegPreprocessor(batch_size=settings.BATCH_SIZE_SEG, img_size=(512, 512))
 
 train_dataset = tf.data.Dataset.from_tensor_slices(
-    (train[0], tf.ragged.constant(train[1]), tf.ragged.constant(train[2]))
+    (train[0], tf.ragged.constant(list(zip(np.expand_dims(train[1], axis=-1), train[2]))))
     ).shuffle(
         settings.IMG_NUM,
         reshuffle_each_iteration=True
         ).map(
-            lambda x, y, z: tf.py_function(preprocessor.process_single, [x, y, z], [tf.float32, tf.float32]), 
+            lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.float32]), 
             num_parallel_calls=tf.data.AUTOTUNE
             ).padded_batch(
                 settings.BATCH_SIZE_SEG,
@@ -40,9 +40,9 @@ train_dataset = tf.data.Dataset.from_tensor_slices(
                 ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
 val_dataset = tf.data.Dataset.from_tensor_slices(
-    (val[0], tf.ragged.constant(val[1]), tf.ragged.constant(val[2]))
+    (val[0], tf.ragged.constant(list(zip(np.expand_dims(val[1], axis=-1), val[2]))))
     ).map(
-        lambda x, y, z: tf.py_function(preprocessor.process_single, [x, y, z], [tf.float32, tf.float32]), 
+        lambda x, y: tf.py_function(preprocessor.process_single, [x, y], [tf.float32, tf.float32]), 
         num_parallel_calls=tf.data.AUTOTUNE
         ).padded_batch(
             settings.BATCH_SIZE_SEG, 
@@ -53,7 +53,7 @@ model_name = "LineSegUnet_v1"
 model = tf.keras.models.load_model("./Models/LineSeg/Models/" + model_name + "/tf", compile=False)
 
 
-for batch in val_dataset:
+for batch in train_dataset:
     for img, mask in zip(batch[0], batch[1]):
         img = img.numpy()
         mask = mask.numpy()

@@ -67,3 +67,22 @@ def custom_image_resize(image, width = None, height = None, inter = cv2.INTER_AR
         dim = (width, int(h * r))
     resized = cv2.resize(image, dim, interpolation = inter)
     return resized
+
+def pad_or_resize(image, new_width, new_height):
+    (height, width) = image.shape[:2]
+
+    if(width > new_width):
+        image = custom_image_resize(image, width=new_width)
+    else:
+        to_pad = np.zeros((height,new_width-width))
+        image = np.concatenate((image,to_pad),axis=1)
+    
+    (height, width) = image.shape[:2]
+
+    if(height > new_height):
+        image = custom_image_resize(image, height=new_height)
+    else:
+        to_pad=np.zeros((new_height-height,width))
+        image=np.concatenate((image,to_pad), axis=0)
+    
+    return image

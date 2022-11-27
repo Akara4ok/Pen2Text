@@ -16,10 +16,10 @@ sys.path.append('Pipeline/utils')
 from utils_types import Batch
 from utils_types import Sample
 from utils import get_img
-
+from utils import pad_or_resize
 
 class PageSegPreprocessor(Preprocessor):
-    """ Class for preprocessing for images """
+    """ Class for preprocessing images for segmentation """
 
     def __init__(self,
                  img_size: Tuple[int, int],
@@ -27,20 +27,29 @@ class PageSegPreprocessor(Preprocessor):
 
         super().__init__(img_size, batch_size)
 
-    def process_single(self, path: tf.Tensor, bounding_boxes: tf.Tensor) -> Tuple:
-        """ Create mask for single image """
+    def process_img(self, img):
+        """ Process img """
+        img = img / 255 if img.dtype == np.uint8 else img
+        _, img = cv2.threshold(img, 0.8, 1, cv2.THRESH_BINARY_INV)
+        img = pad_or_resize(img, 512, 512)
+        img = cv2.resize(img, self.img_size)
+        img = np.expand_dims(img,axis=-1)
+        return img
 
-        img = get_img(path.numpy().decode("utf-8"))
+
+    def create_mask(self, img, bounding_boxes):
+        """ Create mask from bounding boxes """
         mask = np.zeros_like(img)
-        for x, y, w, h in bounding_boxes.numpy():
-            mask[y:y+h, x:x+w] = 255
-
+        mask = mask / 255 if mask.dtype == np.uint8 else mask
+        for x, y, w, h in bounding_boxes:
+            mask[y:y+h, x:x+w] = 1
+        
         min_x = 100000
         min_y = 100000
         max_x = -1
         max_y = -1
         
-        for x, y, w, h in bounding_boxes.numpy():
+        for x, y, w, h in bounding_boxes:
             if max_x < x + w:
                 max_x = x + w
             if min_x > x:
@@ -57,18 +66,24 @@ class PageSegPreprocessor(Preprocessor):
 
         img = img[min_y:max_y, min_x:max_x]
         mask = mask[min_y:max_y, min_x:max_x]
-        
-        _, img = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY_INV)
-
-        img = cv2.resize(img, self.img_size)
-        img = img / 255
-        img = np.expand_dims(img,axis=-1)
+        mask = pad_or_resize(mask, 512, 512)
 
         mask = cv2.resize(mask, self.img_size)
-        mask = mask / 255
         mask = np.expand_dims(mask,axis=-1)
+        return img, mask
+
+    def process_single(self, x: tf.Tensor, y: tf.Tensor) -> Tuple:
+        """ Create mask for single image """
+
+        img = get_img(x.numpy().decode("utf-8"))
+        img, mask = self.create_mask(img, y.numpy())
+        img = self.process_img(img)
 
         return (img, mask)
+    
+    def process_inference(self, x: np.ndarray) -> np.ndarray:
+        img = self.process_img(x)
+        return img
     
     def process_batch(self, batch: list) -> list:
         """ Create masks for whole batch """

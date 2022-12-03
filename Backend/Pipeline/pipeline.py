@@ -16,12 +16,13 @@ from page_seg_inference import PageSegInference
 
 class Pipeline():
     """ Pipeline for infering image """
-    def __init__(self) -> None: 
-        self.word_inference = RecognitionInference()
-        self.line_inference = LineSegInference()
-        self.page_inference = PageSegInference()
+    def __init__(self, word_inferences: dict, line_inference: LineSegInference, page_inference: PageSegInference) -> None: 
+        self.word_inferences = word_inferences
+        self.line_inference = line_inference
+        self.page_inference = page_inference
 
-    def process_images(self, images: list) -> str:
+    def process_images(self, images: list, language) -> str:
+        """ Process image pipeline """
         results = []
         for img in images:
             line_imgs = self.page_inference.predict(np.expand_dims(img, axis=0))
@@ -29,7 +30,7 @@ class Pipeline():
 
             for line in line_imgs:
                 words_imgs = self.line_inference.predict(np.expand_dims(line, axis=0))
-                words.extend(self.word_inference.predict(words_imgs))
+                words.extend(self.word_inferences[language].predict(words_imgs))
             
             results.append(' '.join(words))
         return results

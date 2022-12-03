@@ -1,0 +1,15 @@
+{
+    "python.analysis.extraPaths": [
+        "./Pipeline/Dataloaders",
+        "./Pipeline/Preprocessing",
+        "./Pipeline/utils",
+        "./Pipeline/Model",
+        "./Pipeline/Dataloaders/InferenceDataloader",
+        "./Pipeline/Dataset/IAM Dataset",
+        "./Pipeline/Training/Callbacks",
+        "./Pipeline/Dataloaders/IAM Dataloader",
+        "./Pipeline/Postprocessing",
+        "./Pipeline/Dataset/IAM Dataset Sequence",
+        "./Pipeline/Inference"
+    ]
+}

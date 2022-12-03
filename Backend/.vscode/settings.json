@@ -13,6 +13,7 @@
         "./Pipeline/Postprocessing",
         "./Pipeline/Dataset/IAM Dataset Sequence",
         "./Pipeline/Inference",
-        "./Pipeline"
+        "./Pipeline",
+        "./Exceptions"
     ]
 }

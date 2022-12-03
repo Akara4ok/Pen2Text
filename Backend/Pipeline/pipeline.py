@@ -13,6 +13,8 @@ sys.path.append('Pipeline/Inference')
 from recognition_inference import RecognitionInference
 from line_seg_inference import LineSegInference
 from page_seg_inference import PageSegInference
+sys.path.append('Exceptions')
+from pipeline_exceptions import PipelineException
 
 class Pipeline():
     """ Pipeline for infering image """
@@ -24,13 +26,18 @@ class Pipeline():
     def process_images(self, images: list, language) -> str:
         """ Process image pipeline """
         results = []
-        for img in images:
-            line_imgs = self.page_inference.predict(np.expand_dims(img, axis=0))
-            words = []
+        
+        try:
+            for index, img in enumerate(images):
+                line_imgs = self.page_inference.predict(np.expand_dims(img, axis=0))
+                words = []
 
-            for line in line_imgs:
-                words_imgs = self.line_inference.predict(np.expand_dims(line, axis=0))
-                words.extend(self.word_inferences[language].predict(words_imgs))
-            
-            results.append(' '.join(words))
+                for line in line_imgs:
+                    words_imgs = self.line_inference.predict(np.expand_dims(line, axis=0))
+                    words.extend(self.word_inferences[language].predict(words_imgs))
+                
+                results.append(' '.join(words))
+        except:
+            raise PipelineException(index=index)
+
         return results

@@ -25,7 +25,7 @@ class RecognitionInference(Inference):
     """ Class for inference word image """
 
     def __init__(self, 
-                model_name: str = "ImprovedPen2Text_v7",
+                model_name: str = "Pen2Text_latest",
                 char_list_path: str = settings.CHAR_DIR, 
                 img_size: Tuple = (settings.HEIGHT, settings.WIDTH), 
                 max_len: int = settings.MAX_LEN, 
@@ -44,8 +44,6 @@ class RecognitionInference(Inference):
         for word in word_images:
             processed_word = self.preprocessor.process_inference(word)
             processed_words.append(processed_word)
-            cv2.imshow("img", processed_word)
-            cv2.waitKey(0)
 
         try:
             predictions = self.model.predict(processed_words, verbose=0)

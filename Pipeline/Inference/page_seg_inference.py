@@ -25,7 +25,7 @@ class PageSegInference(Inference):
     """ Class for inference line segmentation to words """
 
     def __init__(self, 
-                model_name: str = "PageSegUnet_v1",
+                model_name: str = "PageSegUnet_latest",
                 img_size: Tuple = (512, 512), 
                 batch_size: int = settings.BATCH_SIZE) -> None:
 
@@ -46,9 +46,6 @@ class PageSegInference(Inference):
 
         for index, mask in enumerate(pred_masks):
             _, mask = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
-            cv2.imshow("img", processed_pages[index])
-            cv2.imshow("mask", mask)
-            cv2.waitKey(0)
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             line_coordinates = []
             for c in contours:

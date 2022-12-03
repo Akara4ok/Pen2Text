@@ -25,7 +25,7 @@ class LineSegInference(Inference):
     """ Class for inference line segmentation to words """
 
     def __init__(self, 
-                model_name: str = "LineSegUnet_v1",
+                model_name: str = "LineSegUnet_latest",
                 img_size: Tuple = (512, 512), 
                 batch_size: int = settings.BATCH_SIZE) -> None:
 

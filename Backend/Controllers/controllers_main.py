@@ -2,9 +2,9 @@
 
 import sys
 sys.path.append('Controllers')
-from PenTextController import PenTextController
+from pen_text_controller import PenTextController
 sys.path.append('Services')
-from PenTextService import PenTextService
+from pen_text_service import PenTextService
 
 def init_controllers(pen_text_service: PenTextService) -> PenTextController:
     """ Init pen_text_controller """

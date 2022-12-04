@@ -1,5 +1,12 @@
 Data/
 **/Models
+
+**/__pycache__
+env
+.cache
+*.log
+.git
+
 Dockerfile
 .vscode/
 

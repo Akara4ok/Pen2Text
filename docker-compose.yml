@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  backend:
+    image: "akara4ok/pen2text"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    ports:
+      - "5000:5000"

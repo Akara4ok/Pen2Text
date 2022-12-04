@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('Services')
-from PenTextService import PenTextService
+from pen_text_service import PenTextService
 
 sys.path.append('Exceptions')
 from pipeline_exceptions import PipelineException

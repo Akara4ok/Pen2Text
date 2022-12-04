@@ -31,8 +31,6 @@ class PageSegPreprocessor(Preprocessor):
         """ Process img """
         img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
         img = img / 255 if img.dtype == np.uint8 else img
-        cv2.imshow("img", img)
-        cv2.waitKey(0)
         # _, img = cv2.threshold(img, 0.2, 1, cv2.THRESH_BINARY_INV)
         img = pad_or_resize(img, 512, 512)
         img = cv2.resize(img, self.img_size)

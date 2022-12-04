@@ -1,0 +1,9 @@
+Data/
+**/Models
+Dockerfile
+.vscode/
+
+!Models/LineSeg/Models/LineSegUnet_latest
+!Models/PageSeg/Models/PageSegUnet_latest
+!Models/Recognition/Models/Pen2Text_latest
+!Data/SpellCorrection/big.txt

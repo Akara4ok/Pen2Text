@@ -1,0 +1,48 @@
+{
+    "name": "pen2text",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "webpack-dev-server --hot --open --mode development",
+        "build": "webpack --config webpack.config.js --mode production",
+        "deploy": "firebase deploy --only hosting",
+        "lint": "eslint . --no-error-on-unmatched-pattern",
+        "lint:fix": "npm run lint -- --fix",
+        "format": "prettier --ignore-path .gitignore --check . !**/*.css",
+        "format:fix": "npm run format -- --write",
+        "lint:style": "stylelint --ignore-path .gitignore \"./**/*.css\"",
+        "lint:style:fix": "npm run lint:style -- --fix"
+    },
+    "dependencies": {
+        "axios": "^0.27.2",
+        "exports-loader": "^4.0.0",
+        "file-loader": "^6.2.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.18.9",
+        "@babel/preset-env": "^7.18.9",
+        "@babel/preset-react": "^7.14.5",
+        "autoprefixer": "^9.0.0",
+        "babel-loader": "^8.2.5",
+        "copy-webpack-plugin": "^11.0.0",
+        "css-loader": "^6.7.1",
+        "eslint": "^8.20.0",
+        "eslint-plugin-sonarjs": "^0.14.0",
+        "html-webpack-plugin": "^5.5.0",
+        "postcss-loader": "^6.1.1",
+        "prettier": "^2.7.1",
+        "sass": "^1.42.1",
+        "sass-loader": "^12.1.0",
+        "style-loader": "^3.3.1",
+        "stylelint": "^13.13.0",
+        "stylelint-config-prettier": "^9.0.3",
+        "stylelint-declaration-use-variable": "^1.7.3",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "webpack-dev-server": "^4.9.3",
+        "eslint-plugin-react": "^7.31.10"
+    }
+}

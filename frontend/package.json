@@ -9,9 +9,9 @@
         "deploy": "firebase deploy --only hosting",
         "lint": "eslint . --no-error-on-unmatched-pattern",
         "lint:fix": "npm run lint -- --fix",
-        "format": "prettier --ignore-path .gitignore --check . !**/*.css",
+        "format": "prettier --ignore-path .eslintignore --check . !**/*.css",
         "format:fix": "npm run format -- --write",
-        "lint:style": "stylelint --ignore-path .gitignore \"./**/*.css\"",
+        "lint:style": "stylelint --ignore-path .eslintignore \"./**/*.scss\"",
         "lint:style:fix": "npm run lint:style -- --fix"
     },
     "dependencies": {

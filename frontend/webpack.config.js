@@ -1,7 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const webpack = require('webpack');
 
 module.exports = {
     mode: 'development',
@@ -13,7 +12,12 @@ module.exports = {
             crypto: false,
             fs: false,
             path: false,
-        }
+        },
+        alias: {
+            '@global': path.join(__dirname, 'src/global'),
+            '@Components': path.join(__dirname, 'src/Components'),
+            '@Containers': path.join(__dirname, 'src/Containers'),
+        },
     },
     output: {
         filename: 'bundle.[fullhash].js',
@@ -74,6 +78,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Pen2Text',
+            favicon: './static/logo/favicon.ico',
             template: path.resolve(__dirname, './src/index.html'),
         }),
         new CopyWebpackPlugin({
@@ -97,5 +102,5 @@ module.exports = {
             'Access-Control-Allow-Headers':
                 'X-Requested-With, content-type, Authorization',
         },
-    }
+    },
 };

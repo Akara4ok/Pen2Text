@@ -1,0 +1,20 @@
+@import '@global/global.scss';
+
+.wrapper {
+    position: relative;
+    margin: 20px 50px 20px 20px;
+    padding: 10px;
+    flex-grow: $editor-right-grow;
+    flex-basis: 0;
+    border: solid 1px black;
+    .buttonStyle {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    .dropdownStyle {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+    }
+}

@@ -2,20 +2,50 @@
 
 .wrapper {
     position: relative;
-    width: 100%;
+    width: 760px;
     margin: 20px 20px 20px 50px;
     padding: 10px;
-    flex-grow: $editor-left-grow;
-    flex-basis: 0;
-    border: solid 1px black;
+    // border: solid 1px $accent-color;
+    background-color: $component-color;
+    display: flex;
+    .uploadButtons {
+        position: absolute;
+        left: 20px;
+        bottom: 50px;
+    }
     .buttonStyle {
         position: absolute;
-        right: 20px;
         bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        width: auto;
     }
     .dropdownStyle {
         position: absolute;
         left: 20px;
         bottom: 20px;
+        width: 110px;
+    }
+    .content {
+        // position: relative;
+        display: flex;
+        gap: 10px;
+        justify-content: space-around;
+        height: 450px;
+    }
+    input[type='file'] {
+        color: transparent;
+        width: 100px;
+    }
+    .listButtonWrapper {
+        padding-top: 20px;
+        margin: 16px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+        gap: 10px;
     }
 }

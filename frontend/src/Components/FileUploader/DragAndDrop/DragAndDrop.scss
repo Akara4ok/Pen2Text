@@ -1,0 +1,19 @@
+@import '@global/global.scss';
+
+.wrapper {
+    position: absolute;
+    border: 3px dashed $dragdrop-border-color;
+    background-color: $dragdrop-background-color;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    p {
+        font-size: 60px;
+        color: $text-color;
+    }
+}

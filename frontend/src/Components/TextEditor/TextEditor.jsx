@@ -11,7 +11,7 @@ class TextEditor extends React.Component {
         return (
             <div className={classes.wrapper}>
                 <div>Text</div>
-                <DropdownList className={classes.dropdownStyle} />
+                <DropdownList className={classes.dropdownStyle} items={['*.txt', '*.docx', '*.pdf']} />
                 <Button className={classes.buttonStyle}>Download</Button>
             </div>
         );

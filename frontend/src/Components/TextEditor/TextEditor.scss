@@ -6,7 +6,7 @@
     padding: 10px;
     flex-grow: $editor-right-grow;
     flex-basis: 0;
-    border: solid 1px black;
+    background-color: $component-color;
     .buttonStyle {
         position: absolute;
         right: 20px;
@@ -16,5 +16,6 @@
         position: absolute;
         left: 20px;
         bottom: 20px;
+        width: 90px;
     }
 }

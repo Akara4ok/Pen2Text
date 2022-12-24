@@ -1,0 +1,51 @@
+@import '@global/global.scss';
+
+.wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    border: none;
+    border-bottom: solid 1px $accent-color;
+    border-radius: 0;
+    color: $text-color;
+    display: block;
+    font-size: 12px;
+    outline: none;
+    padding: 5px 8px;
+    font-size: 20px;
+    background-color: $component-color;
+    width: 100px;
+    .currentItem {
+        display: flex;
+        justify-content: space-between;
+    }
+    .items{
+        position: absolute;
+        left: 0px;
+        display: none;
+        width: 100%;
+        &:hover{
+            display: block;
+        }
+        div{
+            margin-left: auto;
+            margin-right: auto;
+            border: none;
+            border-bottom: solid 1px $accent-color;
+            border-radius: 0;
+            color: $text-color;
+            display: block;
+            font-size: 12px;
+            outline: none;
+            padding: 5px 8px;
+            font-size: 20px;
+            background-color: $component-color;
+            &:hover{
+                background-color: $hover-component-color;
+                cursor: pointer;
+            }
+        }
+    }
+    .currentItem:hover + .items{
+        display: block;
+    }
+}

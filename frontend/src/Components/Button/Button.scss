@@ -1,0 +1,15 @@
+@import '@global/global.scss';
+
+.buttonComponent {
+    padding: 6px 12px;
+    border: none;
+    background-color: $accent-color;
+    border-radius: 5px;
+    text-align: center;
+    color: $text-secondary-color;
+    font-size: 20px;
+    cursor: pointer;
+    &:hover{
+        background-color: $hover-accent-color;
+    }
+}

@@ -11,8 +11,6 @@ class PenEditor extends React.Component {
         return (
             <div className={classes.wrapper}>
                 <div>Draw</div>
-                <DropdownList />
-                <Button className={classes.buttonStyle}>To Uploader</Button>
             </div>
         );
     }

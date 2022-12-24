@@ -1,0 +1,10 @@
+@import '@global/global.scss';
+
+.wrapper {
+    background-color: $component-secondary-color;
+    // border: 1px solid $accent-color;
+    width: 200px;
+    height: calc(100% - 60px);
+    margin: 5px 0px;
+    overflow: auto;
+}

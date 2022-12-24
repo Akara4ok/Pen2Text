@@ -5,7 +5,8 @@
     padding: 10px;
     flex-grow: $editor-left-grow;
     flex-basis: 0;
-    border: solid 1px black;
+    // border: solid 1px $accent-color;
+    background-color: $component-color;
     .buttonStyle {
         position: absolute;
         right: 20px;

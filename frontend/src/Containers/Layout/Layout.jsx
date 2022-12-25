@@ -59,7 +59,7 @@ class Layout extends React.Component {
                     <FileUploader isFileDroping={isDragEnter} />
                     <TextEditor />
                 </div>
-                <Button>Submit</Button>
+                <Button className={classes.submitButton}>Submit</Button>
             </div>
         );
     }

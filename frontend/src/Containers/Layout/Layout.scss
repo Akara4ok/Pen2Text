@@ -7,17 +7,28 @@
     flex-direction: column;
     align-items: center;
     color: $text-color;
-    position: fixed;
+    position: absolute;
+    // position: fixed;
     overflow: auto;
     .editorContainer {
         width: 100%;
         display: flex;
         gap: 20px;
         height: 600px;
+        @media (max-width: 1400px)  {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+        }
     }
     .title {
         font-size: 50px;
         margin: 20px;
+    }
+
+    .submitButton{
+        margin: 10px
     }
     background-color: $background-color;
 }

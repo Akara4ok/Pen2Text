@@ -10,7 +10,7 @@ class TextEditor extends React.Component {
     render() {
         return (
             <div className={classes.wrapper}>
-                <div>Text</div>
+                Text
                 <DropdownList
                     className={classes.dropdownStyle}
                     items={['*.txt', '*.docx', '*.pdf']}

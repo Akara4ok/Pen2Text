@@ -18,4 +18,8 @@
     &:hover {
         background-color: $hover-accent-color;
     }
+    @media (max-width: 800px)  {
+        width: 70px;
+        font-size: 14px;
+    }
 }

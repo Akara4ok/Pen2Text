@@ -4,9 +4,9 @@ import Layout from '@Containers/Layout/Layout';
 
 function App() {
     return (
-        <>
+        <div className={classes.wrapper}>
             <Layout />
-        </>
+        </div>
     );
 }
 

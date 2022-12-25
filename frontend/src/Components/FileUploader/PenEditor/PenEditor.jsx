@@ -1,8 +1,6 @@
 import React, { createRef } from 'react';
 import classes from './PenEditor.scss';
 import Button from '@Components/Button/Button';
-import Backdrop from '../../Backdrop/Backdrop';
-import Spinner from '../../Spinner/Spinner';
 import { srcToFile } from '../../../utils/utils';
 class PenEditor extends React.Component {
     constructor(props) {
@@ -12,7 +10,6 @@ class PenEditor extends React.Component {
             shouldDraw: false,
             theContext: undefined,
             drawnFiles: this.props.drawnFiles ?? 0,
-            isSaving: false,
         };
         this.canvasRef = createRef();
     }
@@ -87,20 +84,17 @@ class PenEditor extends React.Component {
                 colorSpace: "srgb"
             }
         ).data;
-        this.setState({ isSaving: true });
-        setTimeout(() => {
-            const canvasComponent = this.canvasRef.current;
-            const dataURL = canvasComponent.toDataURL();
-            const CustomFile = {}
-            CustomFile.dataUrl = dataURL;
-            CustomFile.name = 'img' + drawnFiles + '.png';
-            CustomFile.type = 'image/png';
-            srcToFile(CustomFile.dataUrl, CustomFile.name, CustomFile.type).then(file => {
-                this.props.updateFiles([file]);
-                this.props.increaseDrawnFiles();
-                this.setState({ isSaving: false });
-            });
-        }, 0);
+        const canvasComponent = this.canvasRef.current;
+        const dataURL = canvasComponent.toDataURL();
+        const CustomFile = {}
+        CustomFile.dataUrl = dataURL;
+        CustomFile.name = 'img' + drawnFiles + '.png';
+        CustomFile.type = 'image/png';
+        srcToFile(CustomFile.dataUrl, CustomFile.name, CustomFile.type).then(file => {
+            this.props.updateFiles([file]);
+            this.props.increaseDrawnFiles();
+            this.setState({ isSaving: false });
+        });
         this.setState({ drawnFiles });
     };
 
@@ -109,7 +103,7 @@ class PenEditor extends React.Component {
     };
 
     render() {
-        const { size, isSaving } = this.state;
+        const { size } = this.state;
         return (
             <div className={classes.wrapper}>
                 <div className={classes.controls}>
@@ -136,11 +130,6 @@ class PenEditor extends React.Component {
                         onMouseUp={this.end}
                         onMouseMove={this.move}></canvas>
                 </div>
-                {isSaving ? (
-                    <Backdrop>
-                        <Spinner />
-                    </Backdrop>
-                ) : null}
             </div>
         );
     }

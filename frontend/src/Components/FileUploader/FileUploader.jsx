@@ -7,13 +7,16 @@ import FileView from './FileView/FileView';
 import FileList from './FileList/FileList';
 import FileItem from './FileList/FileItem/FileItem';
 import DragAndDrop from './DragAndDrop/DragAndDrop';
-import { FaExchangeAlt } from 'react-icons/fa'
+import { FaExchangeAlt } from 'react-icons/fa';
+import PenEditor from './PenEditor/PenEditor';
 class FileUploader extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             currentFileNo: 0,
+            drawnFiles: 0,
             files: [],
+            isFileViewerMode: true,
         };
     }
 
@@ -79,21 +82,43 @@ class FileUploader extends React.Component {
         this.setState({ currentFileNo: currentFileNo, files: [...files] });
     };
 
+    increaseDrawnFiles = () => {
+        let { drawnFiles } = this.state;
+        this.setState({ drawnFiles: drawnFiles + 1 });
+    };
+
+    changeMode = () => {
+        let {isFileViewerMode} = this.state;
+        isFileViewerMode = !isFileViewerMode;
+        this.setState({isFileViewerMode});
+    }
+
+    setFileViewMode = () => {
+        this.setState({isFileViewerMode: true});
+    }
+
     render() {
         const { isFileDroping } = this.props;
-        console.log(isFileDroping);
-        const { files, currentFileNo } = this.state;
+        const { files, currentFileNo, isFileViewerMode, drawnFiles } = this.state;
         return (
             <div className={classes.wrapper}>
                 <div className={classes.content}>
-                    <FileView
-                        previosFile={files[currentFileNo - 1]}
-                        currentFile={files[currentFileNo]}
-                        nextFile={files[currentFileNo + 1]}
-                        getNextFile={this.getNextFile}
-                        getPreviousFile={this.getPreviousFile}
-                        fileCount={files.length}
-                    />
+                    {isFileViewerMode ? (
+                        <FileView
+                            previosFile={files[currentFileNo - 1]}
+                            currentFile={files[currentFileNo]}
+                            nextFile={files[currentFileNo + 1]}
+                            getNextFile={this.getNextFile}
+                            getPreviousFile={this.getPreviousFile}
+                            fileCount={files.length}
+                        />
+                    ) : (
+                        <PenEditor
+                            updateFiles={this.updateFiles}
+                            increaseDrawnFiles={this.increaseDrawnFiles}
+                            drawnFiles={drawnFiles}
+                        />
+                    )}
                     <div className={classes.listButtonWrapper}>
                         <UploadButton uploadHandler={this.uploadHandler} />
                         <FileList>
@@ -103,12 +128,15 @@ class FileUploader extends React.Component {
                                     key={element.name + index}
                                     index={index}
                                     goToSelectedFile={this.goToSelectedFile}
-                                    deleteByIndex={this.deleteByIndex}>
+                                    deleteByIndex={this.deleteByIndex}
+                                    setFileViewMode={this.setFileViewMode}>
                                     {element.name}
                                 </FileItem>
                             ))}
                         </FileList>
-                        <Button className={classes.buttonStyle}><FaExchangeAlt size={15}/> <span>Pen</span></Button>
+                        <Button className={classes.buttonStyle} onClick={this.changeMode}>
+                            <FaExchangeAlt size={15} /> <span>Pen</span>
+                        </Button>
                     </div>
                 </div>
                 {isFileDroping ? (

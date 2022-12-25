@@ -13,7 +13,7 @@ class FileItem extends React.Component {
         const { id, children, index } = this.props;
         return (
             <div className={classes.wrapper} id={id}>
-                <span onClick={() => this.props.goToSelectedFile(index)}>
+                <span onClick={() => {this.props.setFileViewMode(); this.props.goToSelectedFile(index)}}>
                     {children}
                 </span>
                 <button onClick={() => this.props.deleteByIndex(index)}>

@@ -1,20 +1,43 @@
 @import '@global/global.scss';
 
 .wrapper {
-    margin: 20px 20px 20px 50px;
-    padding: 10px;
-    flex-grow: $editor-left-grow;
-    flex-basis: 0;
-    // border: solid 1px $accent-color;
+    width: 500px;
+    height: calc(100% - 20px);
     background-color: $component-color;
-    .buttonStyle {
-        position: absolute;
-        right: 20px;
-        bottom: 20px;
+    margin: 30px 10px;
+    box-sizing: border-box;
+    position: relative;
+    color: $text-secondary-color;
+    font-size: 25px;
+    background-color: white;
+    &:hover {
+        cursor: crosshair;
     }
-    .dropdownStyle {
-        position: absolute;
-        left: 20px;
-        bottom: 20px;
+    .controls {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        background-color: $pen-controls-background-color;
+        padding: 0px 10px;
+        justify-content: space-between;
+        .size {
+            margin-left: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        cursor: auto;
+    }
+    .canvasWrapper {
+        height: calc(100% - 50px);
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
     }
 }

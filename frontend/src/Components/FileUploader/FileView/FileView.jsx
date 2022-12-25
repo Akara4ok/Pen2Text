@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createRef } from 'react';
 import classes from './FileView.scss';
 import Button from '@Components/Button/Button';
 
@@ -10,6 +10,7 @@ class FileView extends React.Component {
             currentFile: this.props.currentFile,
             nextFile: this.props.nextFile,
         };
+        //this.imgRef = createRef();
     }
 
     goToNextFile = () => {
@@ -59,7 +60,7 @@ class FileView extends React.Component {
                     }`}>
                     {currentFile ? (
                         this.imgChecker.test(currentFile.type) ? (
-                            <img src={URL.createObjectURL(currentFile)} />
+                            <img ref={this.imgRef} src={URL.createObjectURL(currentFile)} draggable="false" />
                         ) : (
                             <iframe
                                 src={URL.createObjectURL(currentFile)}></iframe>

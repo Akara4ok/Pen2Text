@@ -29,18 +29,13 @@ class DragAndDrop extends React.Component {
         event.preventDefault();
     };
 
-    dragStartHandler = () => {
-        console.log('drag');
-    };
-
     render() {
         const { className } = this.props;
         return (
             <div
                 className={`${classes.wrapper} ${className ?? ''}`}
                 onDrop={this.dropHandler}
-                onDragOver={this.dragOverHandler}
-                onDragStart={this.dragStartHandler}>
+                onDragOver={this.dragOverHandler}>
                 <p>Drop to upload files</p>
             </div>
         );

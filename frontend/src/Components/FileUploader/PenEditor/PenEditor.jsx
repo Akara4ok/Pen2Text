@@ -69,6 +69,9 @@ class PenEditor extends React.Component {
             theContext.canvas.width,
             theContext.canvas.height,
         );
+        const canvasComponent = this.canvasRef.current;
+        theContext.fillStyle = "white";
+        theContext.fillRect(0, 0, canvasComponent.width, canvasComponent.height);
     };
 
     save = () => {

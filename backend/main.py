@@ -11,7 +11,10 @@ sys.path.append("Services")
 from services_main import init_services
 sys.path.append("Controllers")
 from controllers_main import init_controllers
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 word_inferences, line_inference, page_inference = init_inferences()
 pipeline = Pipeline(word_inferences, line_inference, page_inference)

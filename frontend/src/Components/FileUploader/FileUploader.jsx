@@ -37,6 +37,7 @@ class FileUploader extends React.Component {
             currentFileNo++;
             files.push(uploadedFiles[index]);
         }
+        this.props.setFiles(files);
         this.setState({
             files,
             currentFileNo,
@@ -79,6 +80,7 @@ class FileUploader extends React.Component {
                 currentFileNo = files.length - 1;
             }
         }
+        this.props.setFiles(files);
         this.setState({ currentFileNo: currentFileNo, files: [...files] });
     };
 
@@ -145,6 +147,7 @@ class FileUploader extends React.Component {
                 <DropdownList
                     className={classes.dropdownStyle}
                     items={['English', 'Ukrainian']}
+                    setValue={this.props.setLanguage}
                 />
             </div>
         );

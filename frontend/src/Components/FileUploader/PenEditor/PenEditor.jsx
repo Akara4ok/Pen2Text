@@ -25,8 +25,13 @@ class PenEditor extends React.Component {
             willReadFrequently: true,
         });
         theContext.scale(dpr, dpr);
-        theContext.fillStyle = "white";
-        theContext.fillRect(0, 0, canvasComponent.width, canvasComponent.height);
+        theContext.fillStyle = 'white';
+        theContext.fillRect(
+            0,
+            0,
+            canvasComponent.width,
+            canvasComponent.height,
+        );
 
         this.setState({ theContext });
     }
@@ -70,8 +75,13 @@ class PenEditor extends React.Component {
             theContext.canvas.height,
         );
         const canvasComponent = this.canvasRef.current;
-        theContext.fillStyle = "white";
-        theContext.fillRect(0, 0, canvasComponent.width, canvasComponent.height);
+        theContext.fillStyle = 'white';
+        theContext.fillRect(
+            0,
+            0,
+            canvasComponent.width,
+            canvasComponent.height,
+        );
     };
 
     save = () => {
@@ -84,20 +94,22 @@ class PenEditor extends React.Component {
             theContext.canvas.width,
             theContext.canvas.height,
             {
-                colorSpace: "srgb"
-            }
+                colorSpace: 'srgb',
+            },
         ).data;
         const canvasComponent = this.canvasRef.current;
         const dataURL = canvasComponent.toDataURL();
-        const CustomFile = {}
+        const CustomFile = {};
         CustomFile.dataUrl = dataURL;
         CustomFile.name = 'img' + drawnFiles + '.png';
         CustomFile.type = 'image/png';
-        srcToFile(CustomFile.dataUrl, CustomFile.name, CustomFile.type).then(file => {
-            this.props.updateFiles([file]);
-            this.props.increaseDrawnFiles();
-            this.setState({ isSaving: false });
-        });
+        srcToFile(CustomFile.dataUrl, CustomFile.name, CustomFile.type).then(
+            file => {
+                this.props.updateFiles([file]);
+                this.props.increaseDrawnFiles();
+                this.setState({ isSaving: false });
+            },
+        );
         this.setState({ drawnFiles });
     };
 

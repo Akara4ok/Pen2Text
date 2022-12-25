@@ -9,7 +9,7 @@ class DropdownList extends React.Component {
             currentItem: 0,
         };
     }
-    
+
     onClickHandler = event => {
         const { items } = this.state;
         const currentItem = items.indexOf(event.target.textContent);

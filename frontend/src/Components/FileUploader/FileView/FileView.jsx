@@ -60,7 +60,11 @@ class FileView extends React.Component {
                     }`}>
                     {currentFile ? (
                         this.imgChecker.test(currentFile.type) ? (
-                            <img ref={this.imgRef} src={URL.createObjectURL(currentFile)} draggable="false" />
+                            <img
+                                ref={this.imgRef}
+                                src={URL.createObjectURL(currentFile)}
+                                draggable="false"
+                            />
                         ) : (
                             <iframe
                                 src={URL.createObjectURL(currentFile)}></iframe>

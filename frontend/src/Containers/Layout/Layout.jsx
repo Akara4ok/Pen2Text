@@ -5,6 +5,7 @@ import TextEditor from '@Components/TextEditor/TextEditor';
 import Button from '@Components/Button/Button';
 import Backdrop from '@Components/Backdrop/Backdrop';
 import Spinner from '@Components/Spinner/Spinner';
+import { buildHtmlFromResponse } from '../../utils/utils';
 
 let lastTargetEvent;
 
@@ -15,7 +16,8 @@ class Layout extends React.Component {
             isDragEnter: false,
             isSendingRequest: false,
             files: [],
-            language: 'English'
+            language: 'English',
+            plainText: [],
         };
     }
 
@@ -51,51 +53,51 @@ class Layout extends React.Component {
     };
 
     setFiles = newFiles => {
-        this.setState({files: newFiles});
-    }
+        this.setState({ files: newFiles });
+    };
 
     setLanguage = lang => {
         this.setState({ language: lang });
-    }
+    };
 
-
-
-    sendRequestHandler = (event) => {
+    sendRequestHandler = event => {
         const { files, language } = this.state;
-        
+
         event.preventDefault();
         const formData = new FormData();
         formData.append('language', language);
         for (let index = 0; index < files.length; index++) {
             formData.append('file', files[index]);
         }
-        this.setState({isSendingRequest: true});
+        this.setState({ isSendingRequest: true });
         fetch('http://localhost:5000/pen_text', {
             method: 'POST',
-            body: formData
-          })
-          .then(response => {
-            if (response.status >= 200 && response.status <= 299) {
-              return response.json();
-            } else {
-              return response.json().then(error => {throw new Error(error?.errors ?? "Undefined error")});
-              //throw Error(response.statusText);
-            }
-          })
-          .then(data => {
-            console.log(data);
-            this.setState({isSendingRequest: false});
-          })
-          .catch(error => {
-            console.log(error);
-            this.setState({isSendingRequest: false});
-          })
-        
-        
-    }
+            body: formData,
+        })
+            .then(response => {
+                if (response.status >= 200 && response.status <= 299) {
+                    return response.json();
+                } else {
+                    return response.json().then(error => {
+                        throw new Error(error?.errors ?? 'Undefined error');
+                    });
+                }
+            })
+            .then(data => {
+                console.log(data);
+                this.setState({
+                    isSendingRequest: false,
+                    plainText: data.data.plain_text,
+                });
+            })
+            .catch(error => {
+                console.log(error);
+                this.setState({ isSendingRequest: false });
+            });
+    };
 
     render() {
-        const { isDragEnter, isSendingRequest } = this.state;
+        const { isDragEnter, isSendingRequest, plainText } = this.state;
         return (
             <div
                 className={classes.wrapper}
@@ -105,14 +107,23 @@ class Layout extends React.Component {
                 onDrop={this.onDropHandler}>
                 <div className={classes.title}>Pen2Text</div>
                 <div className={classes.editorContainer}>
-                    <FileUploader isFileDroping={isDragEnter} setFiles={this.setFiles} setLanguage={this.setLanguage}/>
-                    <TextEditor />
+                    <FileUploader
+                        isFileDroping={isDragEnter}
+                        setFiles={this.setFiles}
+                        setLanguage={this.setLanguage}
+                    />
+                    <TextEditor plainText={plainText} />
                 </div>
-                <Button className={classes.submitButton} onClick={this.sendRequestHandler}>Submit</Button>
-                {
-                    isSendingRequest ?
-                    <Backdrop><Spinner/></Backdrop> : null
-                }
+                <Button
+                    className={classes.submitButton}
+                    onClick={this.sendRequestHandler}>
+                    Submit
+                </Button>
+                {isSendingRequest ? (
+                    <Backdrop>
+                        <Spinner />
+                    </Backdrop>
+                ) : null}
             </div>
         );
     }

@@ -90,18 +90,19 @@ class FileUploader extends React.Component {
     };
 
     changeMode = () => {
-        let {isFileViewerMode} = this.state;
+        let { isFileViewerMode } = this.state;
         isFileViewerMode = !isFileViewerMode;
-        this.setState({isFileViewerMode});
-    }
+        this.setState({ isFileViewerMode });
+    };
 
     setFileViewMode = () => {
-        this.setState({isFileViewerMode: true});
-    }
+        this.setState({ isFileViewerMode: true });
+    };
 
     render() {
         const { isFileDroping } = this.props;
-        const { files, currentFileNo, isFileViewerMode, drawnFiles } = this.state;
+        const { files, currentFileNo, isFileViewerMode, drawnFiles } =
+            this.state;
         return (
             <div className={classes.wrapper}>
                 <div className={classes.content}>
@@ -136,7 +137,9 @@ class FileUploader extends React.Component {
                                 </FileItem>
                             ))}
                         </FileList>
-                        <Button className={classes.buttonStyle} onClick={this.changeMode}>
+                        <Button
+                            className={classes.buttonStyle}
+                            onClick={this.changeMode}>
                             <FaExchangeAlt size={15} /> <span>Pen</span>
                         </Button>
                     </div>

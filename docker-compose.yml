@@ -1,6 +1,11 @@
 version: '3.8'
 
 services:
+  frontend:
+    image: "akara4ok/pen2text_frontend"
+    ports:
+      - "81:80"
+
   backend:
     image: "akara4ok/pen2text"
     deploy:

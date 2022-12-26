@@ -1,0 +1,46 @@
+@import '@global/global.scss';
+
+.wrapper {
+    width: 500px;
+    height: calc(100% - 20px);
+    background-color: $component-color;
+    margin: 30px 10px;
+    box-sizing: border-box;
+    position: relative;
+    color: $text-secondary-color;
+    font-size: 25px;
+    background-color: $editor-background-color;
+    &:hover {
+        cursor: crosshair;
+    }
+    .controls {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        background-color: $pen-controls-background-color;
+        padding: 0px 10px;
+        justify-content: space-between;
+        .size {
+            margin-left: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        cursor: auto;
+    }
+    .canvasWrapper {
+        height: calc(100% - 50px);
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: $editor-background-color;
+        }
+    }
+    @media (max-width: 550px) {
+        width: 100%;
+    }
+}

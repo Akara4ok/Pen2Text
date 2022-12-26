@@ -1,0 +1,57 @@
+@import '@global/global.scss';
+
+.wrapper {
+    position: relative;
+    margin: 20px 50px 20px 20px;
+    padding: 10px;
+    flex-grow: $editor-right-grow;
+    // flex-basis: 0;
+    background-color: $component-color;
+    color: $text-color;
+    display: flex;
+    flex-direction: column;
+    width: 760px;
+    .buttonStyle {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    .dropdownStyle {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        width: 90px;
+    }
+    .toolbarClassName {
+        color: $text-secondary-color;
+    }
+    .wrapperClassName {
+        width: 100%;
+        overflow-wrap: break-word;
+        height: calc(100% - 55px);
+        display: flex;
+        flex-direction: column;
+    }
+    .editorClassName {
+        color: $text-secondary-color;
+        background-color: $editor-background-color;
+        padding: 10px;
+        height: calc(100% - 20px);
+        box-sizing: border-box;
+        cursor: text;
+    }
+
+    @media (max-width: 1400px) {
+        width: 760px;
+        min-height: 500px;
+        margin: 20px;
+    }
+    @media (max-width: 800px) {
+        width: 500px;
+        min-height: 500px;
+    }
+    @media (max-width: 550px) {
+        width: 100%;
+        margin: 20px;
+    }
+}

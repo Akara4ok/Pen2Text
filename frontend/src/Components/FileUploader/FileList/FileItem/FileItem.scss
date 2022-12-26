@@ -1,0 +1,22 @@
+@import '@global/global.scss';
+
+.wrapper {
+    border: 1px solid $accent-color;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    background-color: $component-color;
+    span {
+        overflow: hidden;
+        color: $text-color;
+        text-overflow: ellipsis;
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+    }
+    button {
+        margin: 0px 5px;
+    }
+}

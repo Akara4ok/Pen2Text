@@ -1,0 +1,25 @@
+@import '@global/global.scss';
+
+.wrapper {
+    input[type='file'] {
+        display: none;
+    }
+
+    display: flex;
+    padding: 6px 12px;
+    background-color: $accent-color;
+    border-radius: 5px;
+    width: 100px;
+    text-align: center;
+    color: $text-secondary-color;
+    font-size: 20px;
+    cursor: pointer;
+    justify-content: space-around;
+    &:hover {
+        background-color: $hover-accent-color;
+    }
+    @media (max-width: 800px) {
+        width: 70px;
+        font-size: 14px;
+    }
+}

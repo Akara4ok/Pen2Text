@@ -28,15 +28,16 @@
     .wrapperClassName {
         width: 100%;
         overflow-wrap: break-word;
-        height: 100%;
+        height: calc(100% - 55px);
         display: flex;
         flex-direction: column;
     }
     .editorClassName {
         color: $text-secondary-color;
         background-color: $editor-background-color;
-        height: calc(100% - 180px);
         padding: 10px;
+        height: calc(100% - 20px);
+        box-sizing: border-box;
         cursor: text;
     }
 

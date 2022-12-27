@@ -18,6 +18,7 @@ class UkrDataloader(DataLoader):
                     val_percent: float, test_percent: float, img_num: int) -> None:
         super().__init__(data_dir, train_percent, val_percent, test_percent, img_num)
         data = pd.read_csv(self.data_dir + "/" + "words.csv", sep=',', encoding='utf-8')
+        data.path = str(data_dir) + "/" + data.path.astype(str)
         self.samples = list(zip(data.path, data.word))
     
     def split_for_recognition(self, shuffle = True, random_seed = None) -> Tuple:

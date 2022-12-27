@@ -104,7 +104,7 @@ class UkrainianWordsGen():
                 x_offset += char_img_width
 
             _, word_img = cv2.threshold(word_img, 127, 255, cv2.THRESH_BINARY_INV)
-            word_img_path = self.folder_path + "/" + "words" + "/" + sanitize_word + str(index) + ".png"
+            word_img_path = "words" + "/" + sanitize_word + str(index) + ".png"
             cv2.imwrite(word_img_path, word_img)
 
             words_array.append(sanitize_word)

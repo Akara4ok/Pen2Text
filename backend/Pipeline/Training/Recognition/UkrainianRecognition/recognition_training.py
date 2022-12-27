@@ -61,7 +61,7 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "UkrImprovedPen2Text_v6"
+model_name = "UkrImprovedPen2Text_v1"
 
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))

@@ -15,6 +15,7 @@
         "./Pipeline/Inference",
         "./Pipeline",
         "./Exceptions",
-        "./Pipeline/Dataloaders/UkrDataloader"
+        "./Pipeline/Dataloaders/UkrDataloader",
+        "./Pipeline/Postprocessing/SpellCorrection"
     ]
 }

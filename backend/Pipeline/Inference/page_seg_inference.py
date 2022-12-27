@@ -14,8 +14,6 @@ sys.path.append('Pipeline')
 import model_settings as settings
 sys.path.append('Pipeline/Inference')
 from inference import Inference
-sys.path.append('Pipeline/Postprocessing')
-from spell_correction import correction
 sys.path.append('Pipeline/utils')
 from utils import read_charlist
 from utils import simple_decode

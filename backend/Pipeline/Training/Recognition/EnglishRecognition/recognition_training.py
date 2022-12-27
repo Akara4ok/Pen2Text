@@ -67,7 +67,7 @@ model_name = "ImprovedPen2Text_v6"
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
-checkpoint_dir = "./Models/Recognition/Checkpoints" + model_name + "/"
+checkpoint_dir = "./Models/Recognition/Checkpoints/" + model_name + "/"
 
 loadFromCheckpoint = False
 init_epoch = 0

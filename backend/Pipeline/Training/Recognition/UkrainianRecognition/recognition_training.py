@@ -5,6 +5,7 @@ import sys
 from path import Path
 import tensorflow as tf
 from keras.callbacks import ModelCheckpoint
+import cv2
 
 sys.path.append('Pipeline/Dataloaders/UkrDataloader/')
 from ukr_dataloader import UkrDataloader
@@ -30,10 +31,12 @@ from recognition_preprocessor import RecognitionPreprocessor
 #read dataset
 data_loader = UkrDataloader(Path("Data/Ukrainian Characters"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split_for_recognition(shuffle=False)
+train, val, test = data_loader.split_for_recognition(shuffle=True, random_seed=42)
 
 char_list = read_charlist("./Pipeline/UkrCharList.txt")
 max_len = settings.MAX_LEN
+
+print(train[0])
 
 preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 train_dataset = tf.data.Dataset.from_tensor_slices(
@@ -64,7 +67,7 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
 model_name = "UkrImprovedPen2Text_v1"
 
 model=ImprovedPen2Text(char_list)
-model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
+model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.001))
 
 checkpoint_dir = "./Models/Recognition/Checkpoints/" + model_name + "/"
 
@@ -98,7 +101,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram
 
 # lr_callback = tf.keras.callbacks.LearningRateScheduler(scheduler)
 
-callbacks_list = [checkpoint, tensorboard_callback, validation_callback, fullModelSave, convert]
+callbacks_list = [validation_callback]
 
 epochs = 30
 model.fit(

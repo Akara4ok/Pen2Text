@@ -16,6 +16,8 @@
         "./Pipeline",
         "./Exceptions",
         "./Pipeline/Dataloaders/UkrDataloader",
-        "./Pipeline/Postprocessing/SpellCorrection"
+        "./Pipeline/Postprocessing/SpellCorrection",
+        "./Pipeline/Inference/AStartSeg",
+        "./Pipeline/Inference/AStarSeg"
     ]
 }

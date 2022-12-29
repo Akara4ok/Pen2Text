@@ -1,5 +1,6 @@
 """Class for generation ukrainian words"""
 
+import os
 from typing import Tuple
 import numpy as np
 import pandas as pd
@@ -105,7 +106,7 @@ class UkrainianWordsGen():
 
             _, word_img = cv2.threshold(word_img, 127, 255, cv2.THRESH_BINARY_INV)
             word_img_path = "words" + "/" + sanitize_word + str(index) + ".png"
-            cv2.imwrite(word_img_path, word_img)
+            cv2.imwrite(self.folder_path + "/" + word_img_path, word_img)
 
             words_array.append(sanitize_word)
             path_array.append(word_img_path)
@@ -119,6 +120,19 @@ class UkrainianWordsGen():
         return data
 
 
-ukr_words = UkrainianWordsGen('./Data/SpellCorrection/big_ukrainian.txt', "Pipeline/UkrCharList.txt", './Data/Ukrainian Characters', 'glyphs.csv')
-ukr_words.gen(100000)
+# ukr_words = UkrainianWordsGen('./Data/SpellCorrection/big_ukrainian.txt', "Pipeline/UkrCharList.txt", './Data/Ukrainian Characters', 'glyphs.csv')
+# ukr_words.gen(700)
         
+
+path = './Data/Ukrainian Characters/words'
+pathes = os.listdir(path)
+names = os.listdir(path)
+correct_pathes = []
+correct_names = []
+for index in range(len(pathes)):
+    if(names[index][-7] == '7'):
+        correct_pathes.append("words/" + pathes[index])
+        correct_names.append(names[index][:-7])
+
+preprocessed_data = pd.DataFrame({'path': correct_pathes, 'word': correct_names})
+preprocessed_data.to_csv("./Data/Ukrainian Characters/help.csv", index=False)

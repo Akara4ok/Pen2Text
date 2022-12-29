@@ -146,7 +146,8 @@ class RecognitionPreprocessor(Preprocessor):
         width = int(img.shape[1] * scale_percent)
         height = int(img.shape[0] * scale_percent)
         resized = cv2.resize(res_image.astype('float32'),
-                                (width, height), interpolation=cv2.INTER_AREA)
+                                (width, height), interpolation=cv2.INTER_NEAREST)
+
         
         if(self.data_augmentation and not isInference):
             res_image = self.data_augment(res_image)
@@ -171,7 +172,10 @@ class RecognitionPreprocessor(Preprocessor):
         if (not isInference):
             _, res_image = cv2.threshold(res_image, 0.8, 1, cv2.THRESH_BINARY_INV)
         else:
-            _, res_image = cv2.threshold(res_image, 0.1, 1, cv2.THRESH_BINARY)
+            _, res_image = cv2.threshold(res_image, 0, 1, cv2.THRESH_BINARY)
+        
+        # cv2.imshow("word", res_image * 255)
+        # cv2.waitKey(0)
             
         res_image = np.expand_dims(res_image,axis=-1)
 

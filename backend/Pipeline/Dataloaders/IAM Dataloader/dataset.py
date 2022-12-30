@@ -1,6 +1,7 @@
 """Classes for representing iam dataset"""
 
 import os
+import string
 
 class Form():
     """Class for representing forms"""
@@ -29,6 +30,13 @@ class Form():
         for line in line_array:
             bounding_boxes.extend(line.get_word_boxes())
         return bounding_boxes
+
+    def get_text(self):
+        line_array = list(self.lines.values())
+        result = ''
+        for line in line_array:
+            result += line.get_text()
+        return result[1:]
 
 class Line():
     """Class for representing lines"""
@@ -64,6 +72,18 @@ class Line():
         for word in word_array:
             bounding_boxes.append((word.x, word.y, word.width, word.height))
         return bounding_boxes
+    
+    def get_text(self):
+        result = ''
+        word_array = list(self.words.values())
+        punctation = string.punctuation
+        for word in word_array:
+            if(word.text[:-1] in punctation):
+                result += word.text[:-1]
+            else:
+                result += ' ' + word.text[:-1]
+        
+        return result
 
 class Word():
     """Class for representing words"""

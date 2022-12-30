@@ -17,7 +17,7 @@ from recognition_preprocessor import RecognitionPreprocessor
 sys.path.append('Pipeline/utils')
 from utils import simple_decode
 sys.path.append('Pipeline/Postprocessing')
-from spell_correction import correction
+from spell_correction.spell_correction import correction
 
 #read dataset
 data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),

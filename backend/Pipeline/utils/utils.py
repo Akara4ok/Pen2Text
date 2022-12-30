@@ -4,6 +4,10 @@ import numpy as np
 import tensorflow as tf
 import os
 import cv2
+import random
+import sys
+sys.path.append('Pipeline/')
+import model_settings as settings
 
 def read_charlist(file_path: str):
     """ Read possible char lists from file """
@@ -86,3 +90,28 @@ def pad_or_resize(image, new_width, new_height):
         image=np.concatenate((image,to_pad), axis=0)
     
     return image
+
+def crop_img(img, bounding_boxes):
+    """ Create mask from bounding boxes """
+    min_x = 100000
+    min_y = 100000
+    max_x = -1
+    max_y = -1
+    
+    for x, y, w, h in bounding_boxes:
+        if max_x < x + w:
+            max_x = x + w
+        if min_x > x:
+            min_x = x
+        if max_y < y + h:
+            max_y = y + h
+        if min_y > y:
+            min_y = y
+    
+    max_x += random.Random(settings.RANDOM_SEED).randint(0, 200)
+    min_x -= random.Random(settings.RANDOM_SEED).randint(0, 200) 
+    min_y -= random.Random(settings.RANDOM_SEED).randint(0, 50)
+    max_y += random.Random(settings.RANDOM_SEED).randint(0, 200)
+
+    img = img[min_y:max_y, min_x:max_x]
+    return img

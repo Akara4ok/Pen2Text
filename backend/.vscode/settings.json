@@ -14,6 +14,11 @@
         "./Pipeline/Dataset/IAM Dataset Sequence",
         "./Pipeline/Inference",
         "./Pipeline",
-        "./Exceptions"
+        "./Exceptions",
+        "./Pipeline/Dataloaders/UkrDataloader",
+        "./Pipeline/Postprocessing/SpellCorrection",
+        "./Pipeline/Inference/AStartSeg",
+        "./Pipeline/Inference/AStarSeg",
+        "./Pipeline/Postprocessing/TextPostprocessing"
     ]
 }

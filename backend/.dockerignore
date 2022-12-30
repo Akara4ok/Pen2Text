@@ -14,3 +14,4 @@ Dockerfile
 !Models/PageSeg/Models/PageSegUnet_latest
 !Models/Recognition/Models/Pen2Text_latest
 !Data/SpellCorrection/big.txt
+!Data/SpellCorrection/big_ukrainian.txt

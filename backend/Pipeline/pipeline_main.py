@@ -19,6 +19,6 @@ def init_inferences() -> tuple:
                                             char_list_path=settings.UKR_CHAR_DIR, 
                                             correction_file=settings.TEXT_CORRECTION_FILE_UKR)
     }
-    line_inference = StatLineSegInference()
-    page_inference = AStarPageSegInference()
+    line_inference = LineSegInference()
+    page_inference = PageSegInference()
     return word_inferences, line_inference, page_inference

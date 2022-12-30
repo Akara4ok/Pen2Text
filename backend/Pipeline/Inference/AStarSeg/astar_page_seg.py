@@ -114,10 +114,11 @@ class AStarPageSegInference():
     
         for img in pages:
             # img = img / 255
-            img = cv2.adaptiveThreshold(img, 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
+            # img = cv2.adaptiveThreshold(img, 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
             sobel_image = sobel(img)
             hpp = self.horizontal_projections(sobel_image)
-            hpp = savgol_filter(hpp, 51, 5) # window size 51, polynomial order 3
+
+            hpp = savgol_filter(hpp, min(20, len(hpp)), min(7, len(hpp) - 1)) # window size 51, polynomial order 3
 
             peaks = self.find_peak_regions(hpp)
 
@@ -130,6 +131,9 @@ class AStarPageSegInference():
                     segmented_img[ri, :] = 0
 
             hpp_clusters = self.get_hpp_walking_regions(peaks_index)
+            if(len(hpp_clusters) < 3):
+                result.append(img)
+                continue
 
             binary_image = img
 
@@ -140,7 +144,7 @@ class AStarPageSegInference():
                 #create the doorways
                 for index, road_blocks in enumerate(road_blocks_cluster_groups):
                     window_image = nmap[:, road_blocks[0]: road_blocks[1]+10]
-                    binary_image[cluster_of_interest[0]:cluster_of_interest[len(cluster_of_interest)-1],:][:, road_blocks[0]: road_blocks[1]+10][int(window_image.shape[0]/2),:] *= 0
+                    binary_image[cluster_of_interest[0]:cluster_of_interest[len(cluster_of_interest)-1],:][:][int(window_image.shape[0]/2),:] *= 0
                 binary_image[-2:-1] = 0
 
 
@@ -152,6 +156,7 @@ class AStarPageSegInference():
                     offset_from_top = cluster_of_interest[0]
                     path[:,0] += offset_from_top
                     line_segments.append(path)
+            
 
             ## add an extra line to the line segments array which represents the last bottom row on the image
             last_bottom_row = np.flip(np.column_stack(((np.ones((img.shape[1],))*img.shape[0]), np.arange(img.shape[1]))).astype(int), axis=0)

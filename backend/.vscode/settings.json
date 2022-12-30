@@ -18,6 +18,7 @@
         "./Pipeline/Dataloaders/UkrDataloader",
         "./Pipeline/Postprocessing/SpellCorrection",
         "./Pipeline/Inference/AStartSeg",
-        "./Pipeline/Inference/AStarSeg"
+        "./Pipeline/Inference/AStarSeg",
+        "./Pipeline/Postprocessing/TextPostprocessing"
     ]
 }

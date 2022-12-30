@@ -17,7 +17,8 @@ from inference import Inference
 sys.path.append('Pipeline/utils')
 from utils import read_charlist
 from utils import simple_decode
-
+sys.path.append('Pipeline/Inference/AStarSeg')
+from astar_page_seg import AStarPageSegInference
 
 class PageSegInference(Inference):
     """ Class for inference line segmentation to words """
@@ -29,6 +30,7 @@ class PageSegInference(Inference):
 
         super().__init__(model_name, img_size, batch_size, "PageSeg")
         self.preprocessor = PageSegPreprocessor(batch_size=self.batch_size, img_size=self.img_size)
+        self.astar_improvement = AStarPageSegInference()
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         """ Predict words imgs from line """
@@ -55,6 +57,10 @@ class PageSegInference(Inference):
                 (x, y, w, h) = line
                 img_line = processed_pages[index, y:y+h,x:x+w]
                 img_line = np.squeeze(img_line, axis=-1)
-                result.append(img_line)
-    
+                try:
+                    sublines = self.astar_improvement.predict(np.expand_dims(img_line, axis=0))
+                except:
+                    sublines = [img_line]
+                result.extend(sublines)
+                
         return result

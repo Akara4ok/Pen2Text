@@ -164,6 +164,28 @@ class DataLoaderIAM(DataLoader):
                 (val_forms_path, val_line_boxes),
                 (test_forms_path, test_line_boxes))
     
+    def get_text(self, shuffle = True, random_seed = None) -> Tuple:
+        """ Split dataset to train, validation and test """
+        forms = list(self.dataset.values())
+        if shuffle:
+            if random_seed:
+                random.Random(random_seed).shuffle(forms)
+            else:
+                random.shuffle(forms)
+
+        
+        train_idx = int(settings.TRAIN_PERCENT * len(forms))
+        val_idx = train_idx + \
+            int(settings.VAL_PERCENT * len(forms))
+        
+        train_forms_path = [x.get_text() for x in forms[:train_idx]]
+
+        val_forms_path = [x.get_text() for x in forms[train_idx:val_idx]]
+
+        test_forms_path = [x.get_text() for x in forms[val_idx:]]
+
+        return (train_forms_path, val_forms_path, test_forms_path)
+    
         
     def split_for_line_segmentation(self, shuffle = True, random_seed = None) -> Tuple:
         forms = list(self.dataset.values())

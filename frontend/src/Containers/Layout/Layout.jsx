@@ -17,6 +17,7 @@ class Layout extends React.Component {
             isSendingRequest: false,
             files: [],
             language: 'English',
+            networkName: 'Letters',
             plainText: [],
         };
     }
@@ -59,13 +60,18 @@ class Layout extends React.Component {
     setLanguage = lang => {
         this.setState({ language: lang });
     };
+    
+    setNetworkName = name => {
+        this.setState({ networkName: name });
+    };
 
     sendRequestHandler = event => {
-        const { files, language } = this.state;
+        const { files, language, networkName } = this.state;
 
         event.preventDefault();
         const formData = new FormData();
         formData.append('language', language);
+        formData.append('networkName', networkName);
         for (let index = 0; index < files.length; index++) {
             formData.append('file', files[index]);
         }
@@ -111,6 +117,7 @@ class Layout extends React.Component {
                         isFileDroping={isDragEnter}
                         setFiles={this.setFiles}
                         setLanguage={this.setLanguage}
+                        setNetworkName={this.setNetworkName}
                     />
                     <TextEditor plainText={plainText} />
                 </div>

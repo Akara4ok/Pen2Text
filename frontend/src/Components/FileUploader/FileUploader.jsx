@@ -17,10 +17,16 @@ class FileUploader extends React.Component {
             drawnFiles: 0,
             files: [],
             isFileViewerMode: true,
+            language: 'English',
+            networkName: 'Letters',
         };
     }
 
     typeChecker = /^image\/.*|application\/pdf/;
+    networkNameDict = {
+        "English": ["Letters", "Letters+Numbers", "All chars"],
+        "Ukrainian": ["Letters"]
+    }
 
     uploadHandler = event => {
         const uploadedFiles = event.target.files;
@@ -99,9 +105,19 @@ class FileUploader extends React.Component {
         this.setState({ isFileViewerMode: true });
     };
 
+    setLanguage = (language) => {
+        this.setState({ language: language });
+        this.props.setLanguage(language);
+    }
+
+    setNetworkName = (name) => {
+        this.setState({ networkName: name });
+        this.props.setNetworkName(name);
+    }
+
     render() {
         const { isFileDroping } = this.props;
-        const { files, currentFileNo, isFileViewerMode, drawnFiles } =
+        const { files, currentFileNo, isFileViewerMode, drawnFiles, language } =
             this.state;
         return (
             <div className={classes.wrapper}>
@@ -147,11 +163,17 @@ class FileUploader extends React.Component {
                 {isFileDroping ? (
                     <DragAndDrop onDrop={this.updateFiles} />
                 ) : null}
-                <DropdownList
-                    className={classes.dropdownStyle}
-                    items={['English', 'Ukrainian']}
-                    setValue={this.props.setLanguage}
-                />
+                <div className={classes.dropdownStyle}>
+                    <DropdownList
+                        items={['English', 'Ukrainian']}
+                        setValue={this.setLanguage}
+                    />
+                    <DropdownList
+                        className={classes.networkName}
+                        items={this.networkNameDict[language]}
+                        setValue={this.setNetworkName}
+                    />
+                </div>
             </div>
         );
     }

@@ -24,8 +24,9 @@ pen_text_controller = init_controllers(pen_text_service)
 @app.route('/pen_text', methods=['POST'])
 def Pen2Text():
     language = request.form["language"]
+    network_name = request.form["networkName"]
     uploaded_files = request.files.getlist('file')
-    return pen_text_controller.process(uploaded_files, language)
+    return pen_text_controller.process(uploaded_files, language, network_name)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

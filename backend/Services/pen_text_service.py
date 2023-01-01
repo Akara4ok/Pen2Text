@@ -3,7 +3,7 @@ import sys
 import io
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import fitz
 
 sys.path.append('Exceptions')
@@ -47,6 +47,7 @@ class PenTextService():
 
             try:
                 input_image = Image.open(file).convert("L")
+                input_image = ImageOps.exif_transpose(input_image)
             except:
                 raise BadFileContentException(file.filename)
                 

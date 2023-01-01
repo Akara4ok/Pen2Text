@@ -27,24 +27,25 @@ pipeline = Pipeline(word_inferences, line_inference, page_inference)
 i = 0
 wer_history = []
 cer_history = []
+predicted_texts = []
+target_texts = []
 for (path, boxes, text) in zip(test[0], test[1], test_text):
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     img = crop_img(img, boxes)
-    predicted_text = pipeline.process_images([img], "ENGLISH")
-    wer_history.append(wer(text, predicted_text))
-    cer_history.append(cer(text, predicted_text))
+    predicted_texts += pipeline.process_images([img], "ENGLISH")
+    target_texts.append(text)
     print("-" * 100)
     print("Index:", i)
     print("Target:", text)
-    print("Predicted:", predicted_text)
-    print("Wer score:", wer_history[-1])
-    print("Cer score:", cer_history[-1])
-    print()
-    avg_wer = sum(wer_history) / len(wer_history)
-    avg_cer = sum(cer_history) / len(cer_history)
-    print("Wer avg score:", avg_wer)
-    print("Cer avg score:", avg_cer)
-    print("-" * 100)
+    print("Predicted:", predicted_texts[-1])
+    print("Wer score:", wer(text, predicted_texts[-1]))
+    print("Cer score:", cer(text, predicted_texts[-1]))
     i += 1
-    if (i > 150):
+    if(i > 200):
         break
+
+avg_wer = wer(target_texts, predicted_texts)
+avg_cer = cer(target_texts, predicted_texts)
+
+print("Wer avg score:", avg_wer)
+print("Cer avg score:", avg_cer)

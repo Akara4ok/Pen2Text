@@ -14,7 +14,7 @@ import model_settings as settings
 
 def init_inferences() -> tuple:
     word_inferences = {
-        "ENGLISH": RecognitionInference(),
+        "ENGLISH": RecognitionInference(model_name="ImprovedPen2Text_v7"),
         "UKRAINIAN": RecognitionInference(model_name="UkrPen2Text_latest",
                                             char_list_path=settings.UKR_CHAR_DIR, 
                                             correction_file=settings.TEXT_CORRECTION_FILE_UKR)

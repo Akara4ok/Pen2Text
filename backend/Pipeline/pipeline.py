@@ -37,7 +37,8 @@ class Pipeline():
                     words.extend(self.word_inferences[language].predict(words_imgs))
                 
                 results.append(' '.join(words))
-        except:
+        except Exception as ex:
+            print(str(ex))
             raise PipelineException(index=index)
 
         return results

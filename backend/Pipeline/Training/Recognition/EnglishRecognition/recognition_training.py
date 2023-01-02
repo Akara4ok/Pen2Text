@@ -32,11 +32,11 @@ data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
 train, val, test = data_loader.split_for_recognition(shuffle=False)
 
-char_list = read_charlist("./Pipeline/CharList.txt")
+char_list = read_charlist("./Pipeline/Charlists/Eng/CharListLettersNumbers.txt")
 max_len = settings.MAX_LEN
 
 
-preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
+preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE, data_augmentation=True)
 train_dataset = tf.data.Dataset.from_tensor_slices(
     (train[0], train[1])
     ).shuffle(
@@ -62,7 +62,7 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v6"
+model_name = "ImprovedPen2Text_v13"
 
 model=ImprovedPen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))

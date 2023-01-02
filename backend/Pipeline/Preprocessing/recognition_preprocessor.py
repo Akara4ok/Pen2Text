@@ -93,13 +93,15 @@ class RecognitionPreprocessor(Preprocessor):
         current_height, current_width = res_image.shape
         # photometric data augmentation
         # TODO delete this part if accuracy will be low
+        def gaussian_koef():
+            return random.randint(1, 3) * 2 + 1
         if random.random() < 0.25:
-            def gaussian_koef():
-                return random.randint(1, 3) * 2 + 1
             img = cv2.GaussianBlur(
                 img, (gaussian_koef(), gaussian_koef()), 0)
         if random.random() < 0.25:
-            img = cv2.dilate(img, np.ones((3, 3)))
+            img = cv2.dilate(img, np.ones((gaussian_koef(), gaussian_koef())))
+        if random.random() < 0.25:
+            img = cv2.erode(img, np.ones((gaussian_koef(), gaussian_koef())))
 
         # geometric data augmentation
         resized_koef = min(width / current_width, height / current_height)

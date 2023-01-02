@@ -31,9 +31,10 @@ class LineSegPreprocessor(Preprocessor):
 
     def process_img(self, img_line, isInference = False):
         """ Process image """
+        # img_line = cv2.adaptiveThreshold(img_line, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
         img_line = img_line / 255 if img_line.dtype == np.uint8 else img_line
         if (not isInference):
-            _, img_line = cv2.threshold(img_line, 0.8, 1, cv2.THRESH_BINARY_INV)
+            img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
 
         img_line = pad_or_resize(img_line, 512, 512)
 

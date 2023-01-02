@@ -59,18 +59,25 @@ def get_img(path):
 
 def custom_image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     """ Resizeing image without distorion """
-    dim = None
     (h, w) = image.shape[:2]
-    if width is None and height is None:
-        return image
-    if width is None:
-        r = height / float(h)
-        dim = (int(w * r), height)
-    else:
-        r = width / float(w)
-        dim = (width, int(h * r))
+    dim = custom_image_resize_sizes(h, w, width, height, inter)
     resized = cv2.resize(image, dim, interpolation = inter)
     return resized
+
+def custom_image_resize_sizes(h, w, new_width = None, new_height = None, inter = cv2.INTER_AREA):
+    """ Calculating size for image resizing """
+    dim = None
+    if new_width is None and new_height is None:
+        return (h, w)
+
+    if new_width is None:
+        r = new_height / float(h)
+        dim = (int(w * r), new_height)
+    else:
+        r = new_width / float(w)
+        dim = (new_width, int(h * r))
+    
+    return dim
 
 def pad_or_resize(image, new_width, new_height):
     (height, width) = image.shape[:2]

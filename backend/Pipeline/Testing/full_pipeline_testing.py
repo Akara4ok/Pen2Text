@@ -32,7 +32,7 @@ target_texts = []
 for (path, boxes, text) in zip(test[0], test[1], test_text):
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     img = crop_img(img, boxes)
-    predicted_texts += pipeline.process_images([img], "ENGLISH")
+    predicted_texts += pipeline.process_images([img], "ENGLISH_LETTERS_NUMBERS")
     target_texts.append(text)
     print("-" * 100)
     print("Index:", i)

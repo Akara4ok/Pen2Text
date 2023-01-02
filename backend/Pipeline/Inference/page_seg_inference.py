@@ -17,6 +17,7 @@ from inference import Inference
 sys.path.append('Pipeline/utils')
 from utils import read_charlist
 from utils import simple_decode
+from utils import custom_image_resize_sizes
 sys.path.append('Pipeline/Inference/AStarSeg')
 from astar_page_seg import AStarPageSegInference
 
@@ -41,11 +42,26 @@ class PageSegInference(Inference):
             processed_page = self.preprocessor.process_inference(page)
             processed_pages.append(processed_page)
         processed_pages = np.array(processed_pages)
+        tresholded_pages = self.preprocessor.treshold_init(pages)
         pred_masks = self.model.predict(processed_pages, verbose = 0)
         pred_masks = (pred_masks * 255).astype('uint8')
 
         for index, mask in enumerate(pred_masks):
             _, mask = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
+            # cv2.imshow("mask", mask)
+            # cv2.waitKey(0)
+                            # for subline in sublines:
+
+            (p_h, p_w) = pages[index].shape
+            new_width = new_height = None
+            if(p_w > 512):
+                (new_width, new_height) = custom_image_resize_sizes(p_h, p_w, new_width=512)
+            
+            if(new_height > 512):
+                (new_width, new_height) = custom_image_resize_sizes(new_width, new_height, new_height=512)
+
+            koef = p_w / new_width
+            
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             line_coordinates = []
             for c in contours:
@@ -55,12 +71,25 @@ class PageSegInference(Inference):
             line_coordinates.sort(key=lambda x:x[1])
             for line in line_coordinates:
                 (x, y, w, h) = line
-                img_line = processed_pages[index, y:y+h,x:x+w]
-                img_line = np.squeeze(img_line, axis=-1)
-                try:
-                    sublines = self.astar_improvement.predict(np.expand_dims(img_line, axis=0))
-                except:
-                    sublines = [img_line]
-                result.extend(sublines)
+                x = int(x * koef)
+                y = int(y * koef)
+                w = int(w * koef)
+                h = int(h * koef)
+
+                img_line = tresholded_pages[index, y:y+h,x:x+w]
+                # img_line = processed_pages[index, y:y+h,x:x+w]
+                # img_line = np.squeeze(img_line, axis=-1)
+
+                # try:
+                #     sublines = self.astar_improvement.predict(np.expand_dims(img_line, axis=0))
+                # except:
+                #     sublines = [img_line]
+                # cv2.imshow("subline", img_line)
+                # cv2.waitKey(0)
+                # for subline in sublines:
+                #     cv2.imshow("subline", subline)
+                #     cv2.waitKey(0)
+
+                result.append(img_line)
                 
         return result

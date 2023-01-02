@@ -89,3 +89,15 @@ class PageSegPreprocessor(Preprocessor):
     def process_batch(self, batch: list) -> list:
         """ Create masks for whole batch """
         pass
+
+    def treshold_init(self, x):
+        """ treshold initial images """ 
+        result = np.zeros_like(x)
+        for index, img in enumerate(x):
+            # blur = cv2.GaussianBlur(img, (5,5),0)
+            thresholded = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
+            # dilated = cv2.dilate(thresholded, np.ones((9, 9)))
+            # eroded = cv2.erode(dilated, np.ones((7, 7)))
+            result[index] = thresholded
+        
+        return result

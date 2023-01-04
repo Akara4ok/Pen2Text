@@ -114,11 +114,6 @@ def crop_img(img, bounding_boxes):
             max_y = y + h
         if min_y > y:
             min_y = y
-    
-    max_x += random.Random(settings.RANDOM_SEED).randint(0, 200)
-    min_x -= random.Random(settings.RANDOM_SEED).randint(0, 200) 
-    min_y -= random.Random(settings.RANDOM_SEED).randint(0, 50)
-    max_y += random.Random(settings.RANDOM_SEED).randint(0, 200)
 
     img = img[min_y:max_y, min_x:max_x]
     return img

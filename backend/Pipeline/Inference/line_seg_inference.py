@@ -51,9 +51,13 @@ class LineSegInference(Inference):
             new_width = new_height = None
             if(l_w > 512):
                 (new_width, new_height) = custom_image_resize_sizes(l_h, l_w, new_width=512)
+            else:
+                new_width = l_w
             
             if(new_height is not None and new_height > 512):
                 (new_width, new_height) = custom_image_resize_sizes(new_width, new_height, new_height=512)
+            else:
+                new_height = l_h
 
             if(new_width is None or new_width == 0):
                 koef = 0
@@ -67,6 +71,8 @@ class LineSegInference(Inference):
                 word_coordinates.append((x, y, w, h))
         
             word_coordinates.sort(key=lambda x:x[0])
+            cv2.imshow("img", lines[index])
+            cv2.waitKey(0)
             for word in word_coordinates:
                 (x, y, w, h) = word
                 x = int(x * koef)
@@ -74,9 +80,10 @@ class LineSegInference(Inference):
                 w = int(w * koef)
                 h = int(h * koef)
                 word_img = lines[index, y:y+h,x:x+w]
-                                # for subline in sublines:
-                # cv2.imshow("img", word_img)
-                # cv2.waitKey(0)
+                if(word_img.shape[0] < 3 or word_img.shape[1] < 3):
+                    continue
+                cv2.imshow("img", word_img)
+                cv2.waitKey(0)
                 result.append(word_img)
     
         return result

@@ -15,7 +15,7 @@ class AStarPageSegInference():
 
     def find_peak_regions(self,  hpp: np.ndarray, divider: int = 2) -> list:
         """ Returns list with peaks(possible line separator) """
-        threshold = np.mean(hpp)
+        threshold = (np.max(hpp)+np.min(hpp))/divider
         peaks = []
         peaks_index = []
         for i, hppv in enumerate(hpp):

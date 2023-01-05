@@ -8,7 +8,7 @@ import cv2
 import string
 import random
 
-def read_charlist(file_path: str):
+def read_charlist(file_path: str) -> list:
     """ Read possible char lists from file """
     char_list_file = open(file_path)
     line = char_list_file.readline()

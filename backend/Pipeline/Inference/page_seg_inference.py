@@ -42,12 +42,13 @@ class PageSegInference(Inference):
             processed_page = self.preprocessor.process_inference(page)
             processed_pages.append(processed_page)
         processed_pages = np.array(processed_pages)
-        tresholded_pages = self.preprocessor.treshold_init(pages)
+        tresholded_pages = self.preprocessor.treshold_array(pages)
         pred_masks = self.model.predict(processed_pages, verbose = 0)
         pred_masks = (pred_masks * 255).astype('uint8')
 
         for index, mask in enumerate(pred_masks):
             _, mask = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
+            # cv2.imshow("page", processed_pages[index])
             # cv2.imshow("mask", mask)
             # cv2.waitKey(0)
                             # for subline in sublines:
@@ -56,9 +57,14 @@ class PageSegInference(Inference):
             new_width = new_height = None
             if(p_w > 512):
                 (new_width, new_height) = custom_image_resize_sizes(p_h, p_w, new_width=512)
+            else:
+                new_width = p_w
             
-            if(new_height > 512):
-                (new_width, new_height) = custom_image_resize_sizes(new_width, new_height, new_height=512)
+            if(new_height is not None):
+                if(new_height > 512):
+                    (new_width, new_height) = custom_image_resize_sizes(new_height, new_width, new_height=512)
+            else:
+                new_height = p_h
 
             koef = p_w / new_width
             
@@ -80,16 +86,17 @@ class PageSegInference(Inference):
                 # img_line = processed_pages[index, y:y+h,x:x+w]
                 # img_line = np.squeeze(img_line, axis=-1)
 
-                # try:
-                #     sublines = self.astar_improvement.predict(np.expand_dims(img_line, axis=0))
-                # except:
-                #     sublines = [img_line]
+                try:
+                    sublines = self.astar_improvement.predict(np.expand_dims(img_line, axis=0))
+                except:
+                    sublines = [img_line]
                 # cv2.imshow("subline", img_line)
                 # cv2.waitKey(0)
                 # for subline in sublines:
                 #     cv2.imshow("subline", subline)
                 #     cv2.waitKey(0)
 
-                result.append(img_line)
-                
+                # result.append(img_line)
+                result.extend(sublines)
+
         return result

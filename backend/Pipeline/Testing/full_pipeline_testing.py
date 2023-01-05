@@ -57,5 +57,8 @@ with open("Logs/model_testing.txt", "w") as text_file:
     avg_wer = wer(target_texts, predicted_texts)
     avg_cer = cer(target_texts, predicted_texts)
 
+    print("Wer avg score:", avg_wer)
+    print("Cer avg score:", avg_cer)
+
     print("Wer avg score:", avg_wer, file=text_file)
     print("Cer avg score:", avg_cer, file=text_file)

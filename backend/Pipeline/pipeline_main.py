@@ -13,11 +13,12 @@ sys.path.append('Pipeline')
 import model_settings as settings
 
 def init_inferences() -> tuple:
+    """ Initialize inferences """
     word_inferences = {
         "ENGLISH_ALL": RecognitionInference(model_name="ImprovedPen2Text_v7"),
         "ENGLISH_LETTERS": RecognitionInference(model_name="ImprovedPen2TextLetters_v1", char_list_path="Pipeline/Charlists/Eng/CharListLetters.txt"),
         "ENGLISH_LETTERS_NUMBERS": RecognitionInference(model_name="ImprovedPen2TextLettersNumbers_v2", char_list_path="Pipeline/Charlists/Eng/CharListLettersNumbers.txt"),
-        "UKRAINIAN": RecognitionInference(model_name="UkrPen2Text_latest",
+        "UKRAINIAN_LETTERS": RecognitionInference(model_name="UkrPen2Text_latest",
                                             char_list_path=settings.UKR_CHAR_DIR, 
                                             correction_file=settings.TEXT_CORRECTION_FILE_UKR),
     }

@@ -29,10 +29,6 @@ class PageSegPreprocessor(Preprocessor):
 
     def process_img(self, img):
         """ Process img """
-        alpha = 2 # Contrast control (1.0-3.0)
-        beta = 0 # Brightness control (0-100)
-        # blur = cv2.GaussianBlur(img, (1,1),0)
-        img = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
         _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
         img = img / 255 if img.dtype == np.uint8 else img
         # _, img = cv2.threshold(img, 0.2, 1, cv2.THRESH_BINARY_INV)
@@ -94,18 +90,11 @@ class PageSegPreprocessor(Preprocessor):
         """ Create masks for whole batch """
         pass
 
-    def treshold_init(self, x):
-        """ treshold initial images """ 
+    def treshold_array(self, x: np.ndarray) -> np.ndarray:
+        """ treshold array of images """ 
         result = np.zeros_like(x)
         for index, img in enumerate(x):
-            # blur = cv2.GaussianBlur(img, (5,5),0)
-            alpha = 2 # Contrast control (1.0-3.0)
-            beta = 0 # Brightness control (0-100)
-            # blur = cv2.GaussianBlur(img, (1,1),0)
-            img = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
             _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-            # dilated = cv2.dilate(thresholded, np.ones((9, 9)))
-            # eroded = cv2.erode(dilated, np.ones((7, 7)))
             result[index] = img
         
         return result

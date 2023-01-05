@@ -9,6 +9,7 @@ class TextPostProcessing():
         self.spell_correction = SpellCorrection(charlist=char_list_path, text_correction_file=spell_correction_file)
 
     def isPunctuationChar(self, s: str) -> bool:
+        """ Check if symbol or string is puctuatuion char """
         if(s == '.' or s == ','):
             return True
         return False

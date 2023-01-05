@@ -9,7 +9,7 @@ import sys
 sys.path.append('Pipeline/')
 import model_settings as settings
 
-def read_charlist(file_path: str):
+def read_charlist(file_path: str) -> list:
     """ Read possible char lists from file """
     char_list_file = open(file_path)
     line = char_list_file.readline()
@@ -37,7 +37,7 @@ def decode_batch_predictions(pred: tf.Tensor, num_to_char: tf.keras.layers) -> l
         output_text.append(result)
     return output_text
 
-def last_checkpoint(checkpoint_dir, begin_pos = 3, end_pos = 7, filename_end_pos = 12):
+def last_checkpoint(checkpoint_dir: str, begin_pos: int = 3, end_pos: int = 7, filename_end_pos: int = 12):
     """ Get last checkpoint in directory """
     res_filename = ""
     max_epoch = -1
@@ -52,19 +52,19 @@ def last_checkpoint(checkpoint_dir, begin_pos = 3, end_pos = 7, filename_end_pos
     return max_epoch, res_filename
 
 
-def get_img(path):
+def get_img(path: str) -> np.ndarray:
     """ Read image """
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     return img
 
-def custom_image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+def custom_image_resize(image: np.ndarray, width: int = None, height: int = None, inter: int = cv2.INTER_AREA) -> np.ndarray:
     """ Resizeing image without distorion """
     (h, w) = image.shape[:2]
     dim = custom_image_resize_sizes(h, w, width, height, inter)
     resized = cv2.resize(image, dim, interpolation = inter)
     return resized
 
-def custom_image_resize_sizes(h, w, new_width = None, new_height = None, inter = cv2.INTER_AREA):
+def custom_image_resize_sizes(h: int, w: int, new_width: int = None, new_height: int = None, inter: int = cv2.INTER_AREA) -> tuple:
     """ Calculating size for image resizing """
     dim = None
     if new_width is None and new_height is None:
@@ -79,7 +79,8 @@ def custom_image_resize_sizes(h, w, new_width = None, new_height = None, inter =
     
     return dim
 
-def pad_or_resize(image, new_width, new_height):
+def pad_or_resize(image: np.ndarray, new_width: int, new_height: int) -> np.ndarray:
+    """ Pad image or resize to get nedded size """
     (height, width) = image.shape[:2]
 
     if(width > new_width):
@@ -98,7 +99,7 @@ def pad_or_resize(image, new_width, new_height):
     
     return image
 
-def crop_img(img, bounding_boxes):
+def crop_img(img: np.ndarray, bounding_boxes: list) -> np.ndarray:
     """ Create mask from bounding boxes """
     min_x = 100000
     min_y = 100000

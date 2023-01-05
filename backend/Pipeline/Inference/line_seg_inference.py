@@ -36,6 +36,8 @@ class LineSegInference(Inference):
         result = []
         processed_lines = []
         for line in lines:
+            # cv2.imshow("line", line)
+            # cv2.waitKey(0)
             processed_line = self.preprocessor.process_inference(line)
             processed_lines.append(processed_line)
 
@@ -54,8 +56,9 @@ class LineSegInference(Inference):
             else:
                 new_width = l_w
             
-            if(new_height is not None and new_height > 512):
-                (new_width, new_height) = custom_image_resize_sizes(new_width, new_height, new_height=512)
+            if(new_height is not None):
+                if(new_height > 512):
+                    (new_width, new_height) = custom_image_resize_sizes(new_width, new_height, new_height=512)
             else:
                 new_height = l_h
 
@@ -71,8 +74,6 @@ class LineSegInference(Inference):
                 word_coordinates.append((x, y, w, h))
         
             word_coordinates.sort(key=lambda x:x[0])
-            cv2.imshow("img", lines[index])
-            cv2.waitKey(0)
             for word in word_coordinates:
                 (x, y, w, h) = word
                 x = int(x * koef)
@@ -82,8 +83,12 @@ class LineSegInference(Inference):
                 word_img = lines[index, y:y+h,x:x+w]
                 if(word_img.shape[0] < 3 or word_img.shape[1] < 3):
                     continue
-                cv2.imshow("img", word_img)
-                cv2.waitKey(0)
+                white = np.sum(word_img)
+                total = word_img.shape[0] * word_img.shape[1] 
+                if(white / total < 0.03):
+                    continue
+                # cv2.imshow("img", word_img)
+                # cv2.waitKey(0)
                 result.append(word_img)
     
         return result

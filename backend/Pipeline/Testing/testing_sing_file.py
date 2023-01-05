@@ -19,7 +19,7 @@ word_inferences, line_inference, page_inference = init_inferences()
 pipeline = Pipeline(word_inferences, line_inference, page_inference)
 
 
-path = "../../TestInference/my_examples/test4.jpg"
+path = "../../TestInference/m01-049.png"
 img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-text = pipeline.process_images([img], "ENGLISH")
+text = pipeline.process_images([img], "ENGLISH_LETTERS_NUMBERS")
 print(text)

@@ -7,13 +7,13 @@ from utils import simple_decode
 class CallbackEval(tf.keras.callbacks.Callback):
     """Displays a batch of outputs after every epoch."""
 
-    def __init__(self, dataset, model, char_list):
+    def __init__(self, dataset: tf.data, model: tf.Tensor, char_list: list) -> None:
         super().__init__()
         self.dataset = dataset
         self.model = model
         self.char_list = char_list
 
-    def on_epoch_end(self, epoch: int, logs=None):
+    def on_epoch_end(self, epoch: int, logs=None) -> None:
         """ predict outputs on validation images """
         predictions = []
         targets = []

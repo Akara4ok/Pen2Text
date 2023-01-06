@@ -4,7 +4,7 @@ from path import Path
 import cv2
 from jiwer import wer
 from jiwer import cer
-
+import os
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
 from iam_dataloader import DataLoaderIAM
@@ -33,12 +33,15 @@ predicted_texts = []
 target_texts = []
 with open("Logs/model_testing.txt", "w") as text_file:
     for (path, boxes, text) in zip(test[0], test[1], test_text):
+        if(not os.path.exists(path)):
+            continue
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         img = crop_img(img, boxes)
         predicted_texts += pipeline.process_images([img], "ENGLISH_LETTERS_NUMBERS")
         target_texts.append(text)
         print("-" * 100)
         print("Index:", i)
+        print("Filename:", path)
         print("Target:", text)
         print("Predicted:", predicted_texts[-1])
         print("Wer score:", wer(text, predicted_texts[-1]))
@@ -46,6 +49,7 @@ with open("Logs/model_testing.txt", "w") as text_file:
 
         print("-" * 100, file=text_file)
         print("Index:", i, file=text_file)
+        print("Filename:", path, file=text_file)
         print("Target:", text, file=text_file)
         print("Predicted:", predicted_texts[-1], file=text_file)
         print("Wer score:", wer(text, predicted_texts[-1]), file=text_file)

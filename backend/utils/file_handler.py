@@ -44,7 +44,7 @@ class FileHandler():
             images.append(image)
             filenames.append(file.filename)
 
-            return (images, filenames)
+        return (images, filenames)
 
     def flatten_pdf(self, pdf_name):
         """ Extract images from pdf """

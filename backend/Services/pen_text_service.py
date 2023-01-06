@@ -43,6 +43,8 @@ class PenTextService():
             raise NotSupportNetworkException()
 
         images, filenames = self.file_handler.processFiles(files)
+        print(filenames)
+        print(len(images))
         results = []
         
         model_name = language + "_" + network_name

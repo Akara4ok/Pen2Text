@@ -21,15 +21,15 @@ class FileUploader extends React.Component {
             isFileViewerMode: true,
             language: 'English',
             networkName: 'Letters',
-            errorMsgs: []
+            errorMsgs: [],
         };
     }
 
     typeChecker = /^image\/.*|application\/pdf/;
     networkNameDict = {
-        "English": ["Letters", "Letters+Numbers", "All chars"],
-        "Ukrainian": ["Letters"]
-    }
+        English: ['Letters', 'Letters+Numbers', 'All chars'],
+        Ukrainian: ['Letters'],
+    };
 
     uploadHandler = event => {
         const uploadedFiles = event.target.files;
@@ -38,13 +38,17 @@ class FileUploader extends React.Component {
 
     updateFiles = uploadedFiles => {
         const { files, errorMsgs } = this.state;
-        let { currentFileNo } = this.state;
-        currentFileNo = files.length - 1;
+        let currentFileNo = files.length - 1;
         for (let index = 0; index < uploadedFiles.length; index++) {
             if (!this.typeChecker.test(uploadedFiles[index].type)) {
-                errorMsgs.push({message: "The content of file is not correct. Filename: " + uploadedFiles[index].name + "\n"});
+                errorMsgs.push({
+                    message:
+                        'The content of file is not correct. Filename: ' +
+                        uploadedFiles[index].name +
+                        '\n',
+                });
                 continue;
-            };
+            }
 
             currentFileNo++;
             files.push(uploadedFiles[index]);
@@ -112,24 +116,30 @@ class FileUploader extends React.Component {
         this.setState({ isFileViewerMode: true });
     };
 
-    setLanguage = (language) => {
+    setLanguage = language => {
         this.setState({ language: language });
         this.props.setLanguage(language);
-    }
+    };
 
-    setNetworkName = (name) => {
+    setNetworkName = name => {
         this.setState({ networkName: name });
         this.props.setNetworkName(name);
-    }
+    };
 
     onErrorHandlerClick = () => {
         this.setState({ errorMsgs: [] });
-    }
+    };
 
     render() {
         const { isFileDroping } = this.props;
-        const { files, currentFileNo, isFileViewerMode, drawnFiles, language, errorMsgs } =
-            this.state;
+        const {
+            files,
+            currentFileNo,
+            isFileViewerMode,
+            drawnFiles,
+            language,
+            errorMsgs,
+        } = this.state;
         return (
             <div className={classes.wrapper}>
                 <div className={classes.content}>
@@ -188,11 +198,9 @@ class FileUploader extends React.Component {
                 {errorMsgs.length > 0 ? (
                     <Backdrop>
                         <Message onClose={this.onErrorHandlerClick}>
-                            {
-                                errorMsgs.map((element, index) => (
-                                    <p key={"error"+index}>{element.message}</p>
-                                ))
-                            }
+                            {errorMsgs.map((element, index) => (
+                                <p key={'error' + index}>{element.message}</p>
+                            ))}
                         </Message>
                     </Backdrop>
                 ) : null}

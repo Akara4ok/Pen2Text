@@ -20,7 +20,7 @@ class Layout extends React.Component {
             language: 'English',
             networkName: 'Letters',
             plainText: [],
-            errorMsgs: []
+            errorMsgs: [],
         };
     }
 
@@ -62,7 +62,7 @@ class Layout extends React.Component {
     setLanguage = lang => {
         this.setState({ language: lang });
     };
-    
+
     setNetworkName = name => {
         this.setState({ networkName: name });
     };
@@ -86,7 +86,7 @@ class Layout extends React.Component {
                 if (response.status >= 200 && response.status <= 299) {
                     return response.json();
                 }
-                return Promise.reject(response)
+                return Promise.reject(response);
                 // throw new Error(error ?? 'Undefined error');
             })
             .then(data => {
@@ -98,17 +98,21 @@ class Layout extends React.Component {
             })
             .catch(response => {
                 response.json().then(error => {
-                    this.setState({ isSendingRequest: false, errorMsgs: error?.errors });
+                    this.setState({
+                        isSendingRequest: false,
+                        errorMsgs: error?.errors,
+                    });
                 });
             });
     };
 
     onErrorHandlerClick = () => {
         this.setState({ errorMsgs: [] });
-    }
+    };
 
     render() {
-        const { isDragEnter, isSendingRequest, plainText, errorMsgs } = this.state;
+        const { isDragEnter, isSendingRequest, plainText, errorMsgs } =
+            this.state;
         return (
             <div
                 className={classes.wrapper}
@@ -139,11 +143,9 @@ class Layout extends React.Component {
                 {errorMsgs.length > 0 ? (
                     <Backdrop>
                         <Message onClose={this.onErrorHandlerClick}>
-                            {
-                                errorMsgs.map((element, index) => (
-                                    <p key={"error"+index}>{element.message}</p>
-                                ))
-                            }
+                            {errorMsgs.map((element, index) => (
+                                <p key={'error' + index}>{element.message}</p>
+                            ))}
                         </Message>
                     </Backdrop>
                 ) : null}

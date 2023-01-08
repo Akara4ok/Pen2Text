@@ -11,11 +11,11 @@ class DropdownList extends React.Component {
     }
 
     componentDidUpdate = () => {
-        const {items, currentItem} = this.state
-        if(items[currentItem] !== this.props.items[currentItem]){
-            this.setState({currentItem: 0})
+        const { items, currentItem } = this.state;
+        if (items[currentItem] !== this.props.items[currentItem]) {
+            this.setState({ currentItem: 0 });
         }
-    }
+    };
 
     onClickHandler = event => {
         const { items } = this.state;

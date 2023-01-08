@@ -86,17 +86,7 @@ class PenEditor extends React.Component {
 
     save = () => {
         let { drawnFiles } = this.state;
-        const { theContext } = this.state;
         drawnFiles++;
-        let image_data = theContext.getImageData(
-            0,
-            0,
-            theContext.canvas.width,
-            theContext.canvas.height,
-            {
-                colorSpace: 'srgb',
-            },
-        ).data;
         const canvasComponent = this.canvasRef.current;
         const dataURL = canvasComponent.toDataURL();
         const CustomFile = {};

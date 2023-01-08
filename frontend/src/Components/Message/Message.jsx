@@ -1,6 +1,6 @@
 import React from 'react';
 import classes from './Message.scss';
-import Button from '@Components/Button/Button'
+import Button from '@Components/Button/Button';
 
 class Message extends React.Component {
     constructor(props) {

@@ -9,6 +9,8 @@ import FileItem from './FileList/FileItem/FileItem';
 import DragAndDrop from './DragAndDrop/DragAndDrop';
 import { FaExchangeAlt } from 'react-icons/fa';
 import PenEditor from './PenEditor/PenEditor';
+import Backdrop from '@Components/Backdrop/Backdrop';
+import Message from '../Message/Message';
 class FileUploader extends React.Component {
     constructor(props) {
         super(props);
@@ -19,6 +21,7 @@ class FileUploader extends React.Component {
             isFileViewerMode: true,
             language: 'English',
             networkName: 'Letters',
+            errorMsgs: []
         };
     }
 
@@ -34,11 +37,14 @@ class FileUploader extends React.Component {
     };
 
     updateFiles = uploadedFiles => {
-        const { files } = this.state;
+        const { files, errorMsgs } = this.state;
         let { currentFileNo } = this.state;
         currentFileNo = files.length - 1;
         for (let index = 0; index < uploadedFiles.length; index++) {
-            if (!this.typeChecker.test(uploadedFiles[index].type)) continue;
+            if (!this.typeChecker.test(uploadedFiles[index].type)) {
+                errorMsgs.push({message: "The content of file is not correct. Filename: " + uploadedFiles[index].name + "\n"});
+                continue;
+            };
 
             currentFileNo++;
             files.push(uploadedFiles[index]);
@@ -46,6 +52,7 @@ class FileUploader extends React.Component {
         this.props.setFiles(files);
         this.setState({
             files,
+            errorMsgs,
             currentFileNo,
         });
     };
@@ -115,9 +122,13 @@ class FileUploader extends React.Component {
         this.props.setNetworkName(name);
     }
 
+    onErrorHandlerClick = () => {
+        this.setState({ errorMsgs: [] });
+    }
+
     render() {
         const { isFileDroping } = this.props;
-        const { files, currentFileNo, isFileViewerMode, drawnFiles, language } =
+        const { files, currentFileNo, isFileViewerMode, drawnFiles, language, errorMsgs } =
             this.state;
         return (
             <div className={classes.wrapper}>
@@ -174,6 +185,17 @@ class FileUploader extends React.Component {
                         setValue={this.setNetworkName}
                     />
                 </div>
+                {errorMsgs.length > 0 ? (
+                    <Backdrop>
+                        <Message onClose={this.onErrorHandlerClick}>
+                            {
+                                errorMsgs.map((element, index) => (
+                                    <p key={"error"+index}>{element.message}</p>
+                                ))
+                            }
+                        </Message>
+                    </Backdrop>
+                ) : null}
             </div>
         );
     }

@@ -1,0 +1,32 @@
+@import '@global/global.scss';
+
+.message {
+    background-color: $message-background-color;
+    border: 5px solid $message-border-color;
+    border-radius: 10px;
+    display: flex;
+    min-height: 150px;
+    justify-content: center;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 400px;
+    color: $text-secondary-color;
+    padding-bottom: 60px;
+    button {
+        bottom: 10px;
+        cursor: pointer;
+        height: 50px;
+        margin: 10px;
+        position: absolute;
+        width: 75px;
+    }
+}
+
+.text {
+    background-color: transparent;
+    font-size: 20px;
+    margin-top: 20px;
+}

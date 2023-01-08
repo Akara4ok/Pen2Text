@@ -32,7 +32,7 @@ data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
 train, val, test = data_loader.split_for_recognition(shuffle=False)
 
-char_list = read_charlist("./Pipeline/Charlists/Eng/CharListLettersNumbers.txt")
+char_list = read_charlist("./Pipeline/Charlists/Eng/CharList.txt")
 max_len = settings.MAX_LEN
 
 
@@ -62,9 +62,9 @@ val_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v13"
+model_name = "Pen2Text_v2"
 
-model=ImprovedPen2Text(char_list)
+model=Pen2Text(char_list)
 model.compile(loss=ctc_loss, optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
 
 checkpoint_dir = "./Models/Recognition/Checkpoints/" + model_name + "/"

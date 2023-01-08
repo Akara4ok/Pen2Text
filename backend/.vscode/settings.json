@@ -20,6 +20,11 @@
         "./Pipeline/Inference/AStartSeg",
         "./Pipeline/Inference/AStarSeg",
         "./Pipeline/Postprocessing/TextPostprocessing",
-        "./utils"
+        "./utils",
+        "./Pipeline/Postprocessing/RecognitionPostprocessing/SpellCorrection",
+        "./Pipeline/Postprocessing/RecognitionPostprocessing",
+        "./Pipeline/Postprocessing/PageSegPostprocessing/AStarSeg",
+        "./Pipeline/Postprocessing/PageSegPostprocessing",
+        "./Pipeline/Postprocessing/LineSegPostprocessing"
     ]
 }

@@ -6,7 +6,7 @@ from line_seg_inference import LineSegInference
 from page_seg_inference import PageSegInference
 sys.path.append('Pipeline/Inference/AStarSeg')
 from astar_page_seg import AStarPageSegInference
-from stat_line_seg import StatLineSegInference
+from LineSegPostprocessing.stat_line_seg import StatLineSegInference
 
 
 sys.path.append('Pipeline')

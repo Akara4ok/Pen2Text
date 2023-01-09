@@ -10,7 +10,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToRaw } from 'draft-js';
 import htmlToDraft from 'html-to-draftjs';
 import draftToHtml from 'draftjs-to-html';
-import { prepareHtmlForDoc, exportToWord, saveFile } from '../../utils/utils';
+import { buildHtmlFromResponse, prepareHtmlForDoc, exportToWord, saveFile } from '../../utils/utils';
 import jsPDF from 'jspdf';
 
 class TextEditor extends React.Component {

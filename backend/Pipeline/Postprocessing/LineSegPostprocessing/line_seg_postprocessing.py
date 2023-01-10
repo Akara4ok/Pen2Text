@@ -57,6 +57,7 @@ class LineSegPostprocessing(Postprocessor):
                 total = word_img.shape[0] * word_img.shape[1] 
                 if(white / total < 0.03):
                     continue
+
                 result.append(word_img)
     
         return result

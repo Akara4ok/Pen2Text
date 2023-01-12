@@ -23,7 +23,7 @@ class Pipeline():
         self.line_inference = line_inference
         self.page_inference = page_inference
 
-    def process_images(self, images: list, language) -> str:
+    def process_images(self, images: list, model_name) -> str:
         """ Process image pipeline """
         results = []
         
@@ -34,10 +34,11 @@ class Pipeline():
 
                 for line in line_imgs:
                     words_imgs = self.line_inference.predict(np.expand_dims(line, axis=0))
-                    words.extend(self.word_inferences[language].predict(words_imgs))
+                    words.extend(self.word_inferences[model_name].predict(words_imgs))
                 
                 results.append(' '.join(words))
-        except:
+        except Exception as ex:
+            print(str(ex))
             raise PipelineException(index=index)
 
         return results

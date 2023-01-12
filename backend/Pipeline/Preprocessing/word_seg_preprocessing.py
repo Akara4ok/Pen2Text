@@ -79,6 +79,9 @@ class WordSegPreprocessor(Preprocessor):
         mask = np.expand_dims(mask,axis=-1)
 
         return (img, mask)
+
+    def process_inference(self, x: np.ndarray) -> np.ndarray:
+        return self.process_single(x)
     
     def process_batch(self, batch: list) -> list:
         """ Create masks for whole batch """

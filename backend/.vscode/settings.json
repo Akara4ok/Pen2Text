@@ -19,6 +19,12 @@
         "./Pipeline/Postprocessing/SpellCorrection",
         "./Pipeline/Inference/AStartSeg",
         "./Pipeline/Inference/AStarSeg",
-        "./Pipeline/Postprocessing/TextPostprocessing"
+        "./Pipeline/Postprocessing/TextPostprocessing",
+        "./utils",
+        "./Pipeline/Postprocessing/RecognitionPostprocessing/SpellCorrection",
+        "./Pipeline/Postprocessing/RecognitionPostprocessing",
+        "./Pipeline/Postprocessing/PageSegPostprocessing/AStarSeg",
+        "./Pipeline/Postprocessing/PageSegPostprocessing",
+        "./Pipeline/Postprocessing/LineSegPostprocessing"
     ]
 }

@@ -10,6 +10,13 @@ class DropdownList extends React.Component {
         };
     }
 
+    componentDidUpdate = () => {
+        const { items, currentItem } = this.state;
+        if (items[currentItem] !== this.props.items[currentItem]) {
+            this.setState({ currentItem: 0 });
+        }
+    };
+
     onClickHandler = event => {
         const { items } = this.state;
         const currentItem = items.indexOf(event.target.textContent);
@@ -18,8 +25,8 @@ class DropdownList extends React.Component {
     };
 
     render() {
-        const { currentItem, items } = this.state;
-        const { className } = this.props;
+        const { currentItem } = this.state;
+        const { className, items } = this.props;
         return (
             <div className={`${classes.wrapper} ${className ?? ''}`}>
                 <div className={classes.currentItem}>
@@ -27,12 +34,12 @@ class DropdownList extends React.Component {
                 </div>
                 <div className={classes.items}>
                     {items?.map((element, index) => (
-                        <div
+                        <span
                             id={element + index}
                             key={element + index}
                             onClick={this.onClickHandler}>
                             {element}
-                        </div>
+                        </span>
                     ))}
                 </div>
             </div>

@@ -6,8 +6,8 @@ import numpy as np
 import time
 from jiwer import cer
 
-sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
-from iam_dataloader import DataLoaderIAM
+sys.path.append('Pipeline/Dataloaders/UkrDataloader/')
+from ukr_dataloader import UkrDataloader
 sys.path.append('Pipeline/')
 import model_settings as settings
 sys.path.append('Pipeline/utils')
@@ -16,16 +16,16 @@ sys.path.append('Pipeline/Preprocessing')
 from recognition_preprocessor import RecognitionPreprocessor
 sys.path.append('Pipeline/utils')
 from utils import simple_decode
-sys.path.append('Pipeline/Postprocessing')
-from spell_correction.spell_correction import correction
+sys.path.append("Pipeline/Postprocessing/RecognitionPostprocessing/SpellCorrection")
+from spell_correction import SpellCorrection
 
 #read dataset
-data_loader = DataLoaderIAM(Path("Data/IAM Dataset"),
+data_loader = UkrDataloader(Path("Data/Ukrainian Characters"),
                             settings.TRAIN_PERCENT, settings.VAL_PERCENT, settings.TEST_PERCENT, settings.IMG_NUM)
-train, val, test = data_loader.split_for_recognition(shuffle=False)
+train, val, test = data_loader.split_for_recognition(shuffle=True, random_seed=42)
 
-char_list = read_charlist("./Pipeline/CharList.txt")
-max_len = data_loader.get_max_len()
+char_list = read_charlist(settings.UKR_CHAR_DIR)
+max_len = settings.MAX_LEN
 
 preprocessor = RecognitionPreprocessor(img_size=(settings.HEIGHT, settings.WIDTH), char_list=char_list, max_len=max_len, batch_size=settings.BATCH_SIZE)
 
@@ -40,8 +40,10 @@ test_dataset = tf.data.Dataset.from_tensor_slices(
             padding_values=(0., tf.cast(len(char_list), dtype=tf.uint8))
             ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-model_name = "ImprovedPen2Text_v7"
+model_name = "UkrImprovedPen2Text_v4"
 model=tf.keras.models.load_model("./Models/Recognition/Models/" + model_name + "/tf", compile=False)
+
+spell_correction = SpellCorrection(charlist=settings.UKR_CHAR_DIR, text_correction_file=settings.TEXT_CORRECTION_FILE_UKR)
 
 correct = 0
 targets = []
@@ -60,7 +62,7 @@ for batch_index, batch in enumerate(test_dataset):
         # print("Original:", target)
         # print("Predicted:", label)
         if(label.isalpha()):
-            label = correction(label)
+            label = spell_correction.correction(label)
             # print("Corrected:", label)
         targets.append(target)
         labels.append(label)

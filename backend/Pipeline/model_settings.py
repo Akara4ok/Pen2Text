@@ -8,8 +8,8 @@ BATCH_SIZE_SEG = 1
 TRAIN_PERCENT = 0.7
 VAL_PERCENT = 0.1
 TEST_PERCENT = 0.2
-CHAR_DIR = 'Pipeline/CharList.txt'
-UKR_CHAR_DIR = 'Pipeline/UkrCharList.txt'
+CHAR_DIR = 'Pipeline/Charlists/Eng/CharList.txt'
+UKR_CHAR_DIR = 'Pipeline/Charlists/Ukr/CharList.txt'
 IMG_NUM = 120000
 RANDOM_SEED = 42
 

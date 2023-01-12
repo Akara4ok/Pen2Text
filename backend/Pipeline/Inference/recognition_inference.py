@@ -14,11 +14,10 @@ sys.path.append('Pipeline')
 import model_settings as settings
 sys.path.append('Pipeline/Inference')
 from inference import Inference
-sys.path.append('Pipeline/Postprocessing/TextPostprocessing')
-from text_postprocessing import TextPostProcessing
+sys.path.append('Pipeline/Postprocessing/RecognitionPostprocessing')
+from recognition_postprocessing import RecognitionPostprocessing
 sys.path.append('Pipeline/utils')
 from utils import read_charlist
-from utils import simple_decode
 
 class RecognitionInference(Inference):
     """ Class for inference word image """
@@ -32,7 +31,7 @@ class RecognitionInference(Inference):
                 batch_size: int = settings.BATCH_SIZE) -> None:
 
         super().__init__(model_name, img_size, batch_size, "Recognition")
-        self.post_process = TextPostProcessing(correction_file, char_list_path)
+        self.post_process = RecognitionPostprocessing(correction_file, char_list_path)
         self.char_list = read_charlist(char_list_path)
         self.preprocessor = RecognitionPreprocessor(
             img_size=img_size, char_list=self.char_list, max_len=max_len, batch_size=batch_size)
@@ -50,18 +49,7 @@ class RecognitionInference(Inference):
             predictions = self.model.predict(processed_words, verbose=0)
         except:
             return []
-        out = tf.keras.backend.get_value(tf.keras.backend.ctc_decode(predictions, input_length=np.ones(predictions.shape[0])*predictions.shape[1],
-                                greedy=False)[0][0])
-
-        for i, x in enumerate(out):
-            label = simple_decode(x, self.char_list)
-
-            (current_label, prev_label) = self.post_process.process(label, result[-1] if len(result) > 0 else None)
-
-            if(prev_label != None):
-                result[-1] = prev_label
-            
-            if(current_label != None):
-                result.append(current_label)
+        
+        result = self.post_process.process(predictions)
         
         return result

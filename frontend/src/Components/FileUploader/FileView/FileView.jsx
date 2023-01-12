@@ -1,4 +1,4 @@
-import React, { createRef } from 'react';
+import React from 'react';
 import classes from './FileView.scss';
 import Button from '@Components/Button/Button';
 

@@ -13,10 +13,12 @@
     padding: 5px 8px;
     font-size: 20px;
     background-color: $component-color;
-    width: 100px;
+    width: 110px;
+    position: relative;
     .currentItem {
         display: flex;
         justify-content: space-between;
+        cursor: pointer;
     }
     .items {
         position: absolute;
@@ -25,8 +27,9 @@
         width: 100%;
         &:hover {
             display: block;
+            z-index: 2;
         }
-        div {
+        span {
             margin-left: auto;
             margin-right: auto;
             border: none;
@@ -40,12 +43,13 @@
             font-size: 20px;
             background-color: $component-color;
         }
-        div:hover {
+        span:hover {
             background-color: $hover-component-color;
             cursor: pointer;
         }
     }
     .currentItem:hover + .items {
         display: block;
+        z-index: 2;
     }
 }

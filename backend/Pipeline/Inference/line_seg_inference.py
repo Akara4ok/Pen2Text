@@ -14,10 +14,8 @@ sys.path.append('Pipeline')
 import model_settings as settings
 sys.path.append('Pipeline/Inference')
 from inference import Inference
-sys.path.append('Pipeline/utils')
-from utils import read_charlist
-from utils import simple_decode
-
+sys.path.append('Pipeline/Postprocessing/LineSegPostprocessing')
+from line_seg_postprocessing import LineSegPostprocessing
 
 class LineSegInference(Inference):
     """ Class for inference line segmentation to words """
@@ -29,32 +27,21 @@ class LineSegInference(Inference):
 
         super().__init__(model_name, img_size, batch_size, "LineSeg")
         self.preprocessor = LineSegPreprocessor(batch_size=self.batch_size, img_size=self.img_size)
+        self.post_processor = LineSegPostprocessing()
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         """ Predict words imgs from line """
         lines = x
-        result = []
         processed_lines = []
         for line in lines:
+            # cv2.imshow("line", line)
+            # cv2.waitKey(0)
             processed_line = self.preprocessor.process_inference(line)
             processed_lines.append(processed_line)
 
         processed_lines = np.array(processed_lines)
         pred_masks = self.model.predict(processed_lines, verbose = 0)
-        pred_masks = (pred_masks * 255).astype('uint8')
-
-        for index, mask in enumerate(pred_masks):
-            _, mask = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            word_coordinates = []
-            for c in contours:
-                x, y, w, h = cv2.boundingRect(c)
-                word_coordinates.append((x, y, w, h))
         
-            word_coordinates.sort(key=lambda x:x[0])
-            for word in word_coordinates:
-                (x, y, w, h) = word
-                word_img = processed_lines[index, y:y+h,x:x+w]
-                result.append(word_img)
-    
-        return result
+        results = self.post_processor.process(pred_masks, lines)
+
+        return results

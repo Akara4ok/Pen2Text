@@ -10,12 +10,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToRaw } from 'draft-js';
 import htmlToDraft from 'html-to-draftjs';
 import draftToHtml from 'draftjs-to-html';
-import {
-    buildHtmlFromResponse,
-    prepareHtmlForDoc,
-    exportToWord,
-    saveFile,
-} from '../../utils/utils';
+import { buildHtmlFromResponse, prepareHtmlForDoc, exportToWord, saveFile } from '../../utils/utils';
 import jsPDF from 'jspdf';
 
 class TextEditor extends React.Component {
@@ -29,9 +24,8 @@ class TextEditor extends React.Component {
         };
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        let { plainText } = this.state;
-        plainText = this.props.plainText;
+    componentDidUpdate(_, prevState) {
+        let plainText = this.props.plainText;
         if (
             !this.props.plainText.length ||
             JSON.stringify(plainText) === JSON.stringify(prevState.plainText)

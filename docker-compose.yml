@@ -8,6 +8,9 @@ services:
 
   backend:
     image: "akara4ok/pen2text"
+    volumes:
+      - ./backend/Models:/app/Models
+      - ./backend/Data/SpellCorrection:/app/Data/SpellCorrection
     deploy:
       resources:
         reservations:

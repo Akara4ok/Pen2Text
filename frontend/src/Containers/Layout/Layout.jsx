@@ -5,6 +5,7 @@ import TextEditor from '@Components/TextEditor/TextEditor';
 import Button from '@Components/Button/Button';
 import Backdrop from '@Components/Backdrop/Backdrop';
 import Spinner from '@Components/Spinner/Spinner';
+import Message from '../../Components/Message/Message';
 import { buildHtmlFromResponse } from '../../utils/utils';
 
 let lastTargetEvent;
@@ -17,7 +18,9 @@ class Layout extends React.Component {
             isSendingRequest: false,
             files: [],
             language: 'English',
+            networkName: 'Letters',
             plainText: [],
+            errorMsgs: [],
         };
     }
 
@@ -60,12 +63,17 @@ class Layout extends React.Component {
         this.setState({ language: lang });
     };
 
+    setNetworkName = name => {
+        this.setState({ networkName: name });
+    };
+
     sendRequestHandler = event => {
-        const { files, language } = this.state;
+        const { files, language, networkName } = this.state;
 
         event.preventDefault();
         const formData = new FormData();
         formData.append('language', language);
+        formData.append('networkName', networkName);
         for (let index = 0; index < files.length; index++) {
             formData.append('file', files[index]);
         }
@@ -77,11 +85,9 @@ class Layout extends React.Component {
             .then(response => {
                 if (response.status >= 200 && response.status <= 299) {
                     return response.json();
-                } else {
-                    return response.json().then(error => {
-                        throw new Error(error?.errors ?? 'Undefined error');
-                    });
                 }
+                return Promise.reject(response);
+                // throw new Error(error ?? 'Undefined error');
             })
             .then(data => {
                 console.log(data);
@@ -90,14 +96,23 @@ class Layout extends React.Component {
                     plainText: data.data.plain_text,
                 });
             })
-            .catch(error => {
-                console.log(error);
-                this.setState({ isSendingRequest: false });
+            .catch(response => {
+                response.json().then(error => {
+                    this.setState({
+                        isSendingRequest: false,
+                        errorMsgs: error?.errors,
+                    });
+                });
             });
     };
 
+    onErrorHandlerClick = () => {
+        this.setState({ errorMsgs: [] });
+    };
+
     render() {
-        const { isDragEnter, isSendingRequest, plainText } = this.state;
+        const { isDragEnter, isSendingRequest, plainText, errorMsgs } =
+            this.state;
         return (
             <div
                 className={classes.wrapper}
@@ -111,6 +126,7 @@ class Layout extends React.Component {
                         isFileDroping={isDragEnter}
                         setFiles={this.setFiles}
                         setLanguage={this.setLanguage}
+                        setNetworkName={this.setNetworkName}
                     />
                     <TextEditor plainText={plainText} />
                 </div>
@@ -122,6 +138,15 @@ class Layout extends React.Component {
                 {isSendingRequest ? (
                     <Backdrop>
                         <Spinner />
+                    </Backdrop>
+                ) : null}
+                {errorMsgs.length > 0 ? (
+                    <Backdrop>
+                        <Message onClose={this.onErrorHandlerClick}>
+                            {errorMsgs.map((element, index) => (
+                                <p key={'error' + index}>{element.message}</p>
+                            ))}
+                        </Message>
                     </Backdrop>
                 ) : null}
             </div>

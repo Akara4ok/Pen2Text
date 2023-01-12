@@ -38,11 +38,18 @@
         position: absolute;
         left: 20px;
         bottom: 20px;
-        width: 110px;
+        display: flex;
+        gap: 40px;
         @media (max-width: 550px) {
             left: 50%;
             transform: translateX(-50%);
             bottom: 60px;
+        }
+        @media (max-width: 360px) {
+            flex-direction: column;
+        }
+        .networkName {
+            width: 170px;
         }
     }
     .content {

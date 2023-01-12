@@ -15,6 +15,7 @@ class AStarPageSegInference():
 
     def find_peak_regions(self,  hpp: np.ndarray, divider: int = 2) -> list:
         """ Returns list with peaks(possible line separator) """
+        # threshold = (np.max(hpp)+np.min(hpp))/divider
         threshold = np.mean(hpp)
         peaks = []
         peaks_index = []
@@ -94,7 +95,7 @@ class AStarPageSegInference():
 
         return road_blocks_cluster_groups
 
-    def extract_line_from_image(self, image, lower_line, upper_line):
+    def extract_line_from_image(self, image: np.ndarray, lower_line: np.ndarray, upper_line: np.ndarray) -> np.ndarray:
         """ Exctract text line between to boundary lines(upper and lower) """
         lower_boundary = np.min(lower_line[:, 0])
         upper_boundary = np.max(upper_line[:, 0])
@@ -115,8 +116,7 @@ class AStarPageSegInference():
         for img in pages:
             # img = img / 255
             # img = cv2.adaptiveThreshold(img, 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
-            sobel_image = sobel(img)
-            hpp = self.horizontal_projections(sobel_image)
+            hpp = self.horizontal_projections(img)
 
             hpp = savgol_filter(hpp, min(20, len(hpp)), min(7, len(hpp) - 1)) # window size 51, polynomial order 3
 

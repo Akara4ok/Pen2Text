@@ -29,7 +29,7 @@ class PageSegPreprocessor(Preprocessor):
 
     def process_img(self, img):
         """ Process img """
-        img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 49, 35)
+        _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
         img = img / 255 if img.dtype == np.uint8 else img
         # _, img = cv2.threshold(img, 0.2, 1, cv2.THRESH_BINARY_INV)
         img = pad_or_resize(img, 512, 512)
@@ -89,3 +89,12 @@ class PageSegPreprocessor(Preprocessor):
     def process_batch(self, batch: list) -> list:
         """ Create masks for whole batch """
         pass
+
+    def treshold_array(self, x: np.ndarray) -> np.ndarray:
+        """ treshold array of images """ 
+        result = np.zeros_like(x)
+        for index, img in enumerate(x):
+            _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+            result[index] = img
+        
+        return result

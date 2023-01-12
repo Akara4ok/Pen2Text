@@ -9,6 +9,8 @@ import FileItem from './FileList/FileItem/FileItem';
 import DragAndDrop from './DragAndDrop/DragAndDrop';
 import { FaExchangeAlt } from 'react-icons/fa';
 import PenEditor from './PenEditor/PenEditor';
+import Backdrop from '@Components/Backdrop/Backdrop';
+import Message from '../Message/Message';
 class FileUploader extends React.Component {
     constructor(props) {
         super(props);
@@ -17,10 +19,17 @@ class FileUploader extends React.Component {
             drawnFiles: 0,
             files: [],
             isFileViewerMode: true,
+            language: 'English',
+            networkName: 'Letters',
+            errorMsgs: [],
         };
     }
 
     typeChecker = /^image\/.*|application\/pdf/;
+    networkNameDict = {
+        English: ['Letters', 'Letters+Numbers', 'All chars'],
+        Ukrainian: ['Letters'],
+    };
 
     uploadHandler = event => {
         const uploadedFiles = event.target.files;
@@ -28,11 +37,18 @@ class FileUploader extends React.Component {
     };
 
     updateFiles = uploadedFiles => {
-        const { files } = this.state;
-        let { currentFileNo } = this.state;
-        currentFileNo = files.length - 1;
+        const { files, errorMsgs } = this.state;
+        let currentFileNo = files.length - 1;
         for (let index = 0; index < uploadedFiles.length; index++) {
-            if (!this.typeChecker.test(uploadedFiles[index].type)) continue;
+            if (!this.typeChecker.test(uploadedFiles[index].type)) {
+                errorMsgs.push({
+                    message:
+                        'The content of file is not correct. Filename: ' +
+                        uploadedFiles[index].name +
+                        '\n',
+                });
+                continue;
+            }
 
             currentFileNo++;
             files.push(uploadedFiles[index]);
@@ -40,6 +56,7 @@ class FileUploader extends React.Component {
         this.props.setFiles(files);
         this.setState({
             files,
+            errorMsgs,
             currentFileNo,
         });
     };
@@ -99,10 +116,30 @@ class FileUploader extends React.Component {
         this.setState({ isFileViewerMode: true });
     };
 
+    setLanguage = language => {
+        this.setState({ language: language });
+        this.props.setLanguage(language);
+    };
+
+    setNetworkName = name => {
+        this.setState({ networkName: name });
+        this.props.setNetworkName(name);
+    };
+
+    onErrorHandlerClick = () => {
+        this.setState({ errorMsgs: [] });
+    };
+
     render() {
         const { isFileDroping } = this.props;
-        const { files, currentFileNo, isFileViewerMode, drawnFiles } =
-            this.state;
+        const {
+            files,
+            currentFileNo,
+            isFileViewerMode,
+            drawnFiles,
+            language,
+            errorMsgs,
+        } = this.state;
         return (
             <div className={classes.wrapper}>
                 <div className={classes.content}>
@@ -147,11 +184,26 @@ class FileUploader extends React.Component {
                 {isFileDroping ? (
                     <DragAndDrop onDrop={this.updateFiles} />
                 ) : null}
-                <DropdownList
-                    className={classes.dropdownStyle}
-                    items={['English', 'Ukrainian']}
-                    setValue={this.props.setLanguage}
-                />
+                <div className={classes.dropdownStyle}>
+                    <DropdownList
+                        items={['English', 'Ukrainian']}
+                        setValue={this.setLanguage}
+                    />
+                    <DropdownList
+                        className={classes.networkName}
+                        items={this.networkNameDict[language]}
+                        setValue={this.setNetworkName}
+                    />
+                </div>
+                {errorMsgs.length > 0 ? (
+                    <Backdrop>
+                        <Message onClose={this.onErrorHandlerClick}>
+                            {errorMsgs.map((element, index) => (
+                                <p key={'error' + index}>{element.message}</p>
+                            ))}
+                        </Message>
+                    </Backdrop>
+                ) : null}
             </div>
         );
     }

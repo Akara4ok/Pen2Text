@@ -4,7 +4,7 @@ from path import Path
 import cv2
 from jiwer import wer
 from jiwer import cer
-
+import os
 
 sys.path.append('Pipeline/Dataloaders/IAM Dataloader/')
 from iam_dataloader import DataLoaderIAM
@@ -24,27 +24,45 @@ train_text, val_text, test_text = data_loader.get_text(shuffle=False)
 word_inferences, line_inference, page_inference = init_inferences()
 pipeline = Pipeline(word_inferences, line_inference, page_inference)
 
+
+
 i = 0
 wer_history = []
 cer_history = []
-for (path, boxes, text) in zip(test[0], test[1], test_text):
-    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    img = crop_img(img, boxes)
-    predicted_text = pipeline.process_images([img], "ENGLISH")
-    wer_history.append(wer(text, predicted_text))
-    cer_history.append(cer(text, predicted_text))
-    print("-" * 100)
-    print("Index:", i)
-    print("Target:", text)
-    print("Predicted:", predicted_text)
-    print("Wer score:", wer_history[-1])
-    print("Cer score:", cer_history[-1])
-    print()
-    avg_wer = sum(wer_history) / len(wer_history)
-    avg_cer = sum(cer_history) / len(cer_history)
+predicted_texts = []
+target_texts = []
+with open("Logs/model_testing.txt", "w") as text_file:
+    for (path, boxes, text) in zip(test[0], test[1], test_text):
+        if(not os.path.exists(path)):
+            continue
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        img = crop_img(img, boxes)
+        predicted_texts += pipeline.process_images([img], "ENGLISH_LETTERS_NUMBERS")
+        target_texts.append(text)
+        print("-" * 100)
+        print("Index:", i)
+        print("Filename:", path)
+        print("Target:", text)
+        print("Predicted:", predicted_texts[-1])
+        print("Wer score:", wer(text, predicted_texts[-1]))
+        print("Cer score:", cer(text, predicted_texts[-1]))
+
+        print("-" * 100, file=text_file)
+        print("Index:", i, file=text_file)
+        print("Filename:", path, file=text_file)
+        print("Target:", text, file=text_file)
+        print("Predicted:", predicted_texts[-1], file=text_file)
+        print("Wer score:", wer(text, predicted_texts[-1]), file=text_file)
+        print("Cer score:", cer(text, predicted_texts[-1]), file=text_file)
+        i += 1
+        if(i > 200):
+            break
+
+    avg_wer = wer(target_texts, predicted_texts)
+    avg_cer = cer(target_texts, predicted_texts)
+
     print("Wer avg score:", avg_wer)
     print("Cer avg score:", avg_cer)
-    print("-" * 100)
-    i += 1
-    if (i > 150):
-        break
+
+    print("Wer avg score:", avg_wer, file=text_file)
+    print("Cer avg score:", avg_cer, file=text_file)

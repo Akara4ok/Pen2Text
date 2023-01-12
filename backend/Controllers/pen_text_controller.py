@@ -9,14 +9,15 @@ from pipeline_exceptions import PipelineException
 from file_exceptions import BadFileContentException
 from file_exceptions import NotSupportContentTypeException
 from language_exceptions import NotSupportLanguageException
+from network_exceptions import NotSupportNetworkException
 
 class PenTextController():
     def __init__(self, pen_text_service: PenTextService):
         self.pen_text_service = pen_text_service
 
-    def process(self, files: list, language: str = "English") -> tuple:
+    def process(self, files: list, language: str = "English", network_name: str = "Letters") -> tuple:
         try:
-            plain_text = self.pen_text_service.process(files, language)
+            plain_text = self.pen_text_service.process(files, language, network_name)
             return {
                 "data": {
                     "plain_text": plain_text
@@ -29,6 +30,13 @@ class PenTextController():
                     "message": str(language_ex)
                 }]
             }, language_ex.status
+        
+        except NotSupportNetworkException as net_ex:
+            return {
+                "errors": [{
+                    "message": str(net_ex)
+                }]
+            }, net_ex.status
 
         except NotSupportContentTypeException as content_type_ex:
             return {
